@@ -1,0 +1,9 @@
+{
+  "JWT_SECRET_KEY" : "MASTER_PASSWORD",
+  "MAIL_SERVER" : "smtp.mailtrap.io",
+  "MAIL_PORT" : 2525,
+  "MAIL_USERNAME" : "3508b3f35588f1",
+  "MAIL_PASSWORD" : "1c89e05802258f",
+  "MAIL_USE_TLS" : true,
+  "MAIL_USE_SSL" : false
+}
