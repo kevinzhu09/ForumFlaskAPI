@@ -10,6 +10,7 @@ function getURLParameter(sParam) {
         }
 
         $(document).ready(function () {
+            const token = getURLParameter('token');
             $("#submit").click(function (e) {
                 e.preventDefault();
                 const password = $("#password").val();
@@ -23,7 +24,7 @@ function getURLParameter(sParam) {
                     type: "PUT",
                     contentType: "application/json",
                     dataType: "json",
-                    headers: { Authorization: "Bearer " + getURLParameter('token') },
+                    headers: { Authorization: "Bearer " + token },
                     data: JSON.stringify({password: password}),
                     error: function (err) {
                         alert(err.status)

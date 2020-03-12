@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-# Constants (can modify the first three):
+# Constants (can modify the first five):
 
 
 # Name the fields/columns that you would like to store data for each user, by listing them in this tuple:
@@ -14,6 +14,9 @@ HOST_URI = 'http://localhost:5000'
 
 # Choose the number of minutes before each access token expires with this constant.
 MINUTES_BEFORE_TOKEN_EXPIRE = 20
+
+# Choose the name of the server.
+SERVER_NAME = "Kevin's Database"
 
 # Choose the length of the salt value for password hashing. 32 should be fine.
 SALT_LENGTH = 32

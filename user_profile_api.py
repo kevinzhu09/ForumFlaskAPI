@@ -18,18 +18,20 @@ from SQL_commands import *
 # External modules: flask handles the URI routes for the API requests. It also allows JSON to be easily written.
 # flask_jwt_extended handles the JSON Web Tokens (JWT) integration which is used for login verification.
 # flask_mail handles the mail server.
-from flask import Flask, jsonify, request, render_template, send_from_directory
+# json helps for reading .json files.
+from flask import Flask, jsonify, request, send_from_directory, render_template
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_mail import Mail, Message
+from json import load
 
-from constants import DESIRED_FIELDS, HOST_URI, MINUTES_BEFORE_TOKEN_EXPIRE, TIME_TO_EXPIRE
+from constants import DESIRED_FIELDS, HOST_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
 
 # Configuration for the Flask app, JWT integration and mail server:
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 with open('mail_JWT_config.json') as file:
-    mail_JWT_data = json.load(file)
+    mail_JWT_data = load(file)
 
 app.config['JWT_SECRET_KEY'] = mail_JWT_data['JWT_SECRET_KEY']
 app.config['MAIL_SERVER'] = mail_JWT_data['MAIL_SERVER']
@@ -43,8 +45,18 @@ jwt = JWTManager(app)
 mail = Mail(app)
 
 # With the information from db_config.json, configure the connection to PostgreSQL and the pgAdmin database.
-# Returns the cursor object which can be used to run SQL commands.
-cur = config()
+# Saves the connection information in a tuple.
+
+with open('db_config.json') as file:
+    db_data = load(file)
+
+dbname = db_data['dbname']
+dbusername = db_data['dbusername']
+dbpassword = db_data['dbpassword']
+dbhost = db_data['dbhost']
+dbport = db_data['dbport']
+
+conn_info = (dbname, dbusername, dbpassword, dbhost, dbport)
 
 
 # Helper function for the API. It allows the API to accept requests in either JSON or through form-data.
@@ -69,13 +81,13 @@ def get_fields_from_request():
 @app.route('/register', methods=['POST'])
 def register():
     email = request_dynamic(request.is_json)('email')
-    if email_exists(cur, email):
+    if email_exists(conn_info, email):
         return jsonify(message='That email already exists.'), 409
     else:
         values_list = get_fields_from_request()
         password = request_dynamic(request.is_json)('password')
         hash_code = get_hash_code(password)
-        create_user(*values_list, cur=cur, hash_code=hash_code, email=email)
+        insert_user(*values_list, conn_info=conn_info, hash_code=hash_code, email=email)
         return jsonify(message="User created successfully."), 201
 
 
@@ -84,7 +96,7 @@ def login():
     email = request_dynamic(request.is_json)('email')
     password = request_dynamic(request.is_json)('password')
 
-    hash_code = query_hash_code(cur, email)
+    hash_code = select_hash_code(conn_info, email)
     verify = verify_hash_code(password, hash_code)
     if verify:
         access_token = create_access_token(identity=email, expires_delta=TIME_TO_EXPIRE)
@@ -95,12 +107,12 @@ def login():
 
 @app.route('/users', methods=['PUT'])
 @jwt_required
-def update_user():
+def modify_user():
     email = request_dynamic(request.is_json)('email')
-    if email_exists(cur, email):
+    if email_exists(conn_info, email):
         values_list = get_fields_from_request()
 
-        modify_user(*values_list, cur=cur, email=email)
+        update_user(*values_list, conn_info=conn_info, email=email)
         return jsonify(message="You updated a user.")
     else:
         return jsonify(message="That user does not exist."), 404
@@ -110,8 +122,8 @@ def update_user():
 @jwt_required
 def remove_user():
     email = request_dynamic(request.is_json)('email')
-    if email_exists(cur, email):
-        delete_user(cur, email)
+    if email_exists(conn_info, email):
+        delete_user(conn_info, email)
         return jsonify(message="You deleted a user.")
     else:
         return jsonify(message="That user does not exist."), 404
@@ -120,7 +132,7 @@ def remove_user():
 @app.route('/users/<int:user_id>', methods=["GET"])
 @jwt_required
 def user_details_by_id(user_id: int):
-    user = select_one_user(cur, 'user_id', user_id)
+    user = select_one_user(conn_info, 'user_id', user_id)
     if user:
         return jsonify(user)
     else:
@@ -132,13 +144,13 @@ def user_details_by_id(user_id: int):
 def user_details():
     email = request.args.get('email')
     if email:
-        user = select_one_user(cur, 'email', email)
+        user = select_one_user(conn_info, 'email', email)
         if user:
             return jsonify(user)
         else:
             return jsonify(message="That user does not exist."), 404
     else:
-        users_list = select_all_users(cur)
+        users_list = select_all_users(conn_info)
         if users_list:
             return jsonify(users_list)
         else:
@@ -148,16 +160,18 @@ def user_details():
 @app.route('/password/reset', methods=['POST'])
 def password_reset():
     email = request_dynamic(request.is_json)('email')
-    if email_exists(cur, email):
+    if email_exists(conn_info, email):
+        username = email.split("@")[0]
         access_token = create_access_token(identity=email, expires_delta=TIME_TO_EXPIRE)
         reset_url = HOST_URI + "/password/reset/confirm?token=" + access_token
         msg = Message(
             body="To reset your password, please click the following link. If you did not request a password reset, "
-                 "disregard this email. This link expires after %d minutes. %s" % (MINUTES_BEFORE_TOKEN_EXPIRE,
-                                                                                   reset_url),
+                 "disregard this email. This link expires after %d minutes.\n%s" % (MINUTES_BEFORE_TOKEN_EXPIRE, reset_url),
+            html=render_template('password_reset_email_contents.html', url=reset_url,
+                                 minutes=MINUTES_BEFORE_TOKEN_EXPIRE, username=username, server=SERVER_NAME),
             sender="no-reply@user-api.com",
             recipients=[email],
-            subject="Password Reset Link for Kevin's Database")
+            subject="Password Reset Link for " + SERVER_NAME)
         mail.send(msg)
 
     return jsonify(message="Email sent to %s." % email), 202
@@ -172,16 +186,16 @@ def password_reset_confirm():
 @jwt_required
 def change_password():
     email = get_jwt_identity()
-    if email_exists(cur, email):
+    if email_exists(conn_info, email):
         password = request_dynamic(request.is_json)('password')
         hash_code = get_hash_code(password)
-        modify_hash_code(cur, hash_code, email)
+        update_hash_code(conn_info, hash_code, email)
         return jsonify(message="Password changed successfully.")
     else:
         return jsonify(message="That user does not exist."), 404
 
 
-@app.route('/not_found')
+@app.route('/not-found')
 def not_found():
     return jsonify(message='That resource was not found.'), 404
 
