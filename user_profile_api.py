@@ -1,5 +1,6 @@
 # Created by Kevin Zhu
 # This file is the main file to run.
+# create_table_example.sql provides an example case of what kind of table this API can work with.
 # requirements.txt should be in the same folder as this file. It lists the dependencies to install for this application.
 #
 # Additional modules part of this API:
@@ -7,8 +8,7 @@
 # db_config.json, which contains the sensitive configuration info to connect to PostgreSQL and the pgAdmin database.
 # mail_JWT_config.json, which contains the mail client and JWT configuration info.
 # hash_code_functions.py, which contains the functions for storing the user password in a hash code.
-# constants.py, which contains the constants including fields, which can be modified in order to work with a variable
-# number of desired fields/columns in the database.
+# constants.py, which contains the constants including fields, which can be modified.
 # These files should all be in the same folder.
 # This app requires Python 3.7 or later.
 
@@ -166,7 +166,8 @@ def password_reset():
         reset_url = HOST_URI + "/password/reset/confirm?token=" + access_token
         msg = Message(
             body="To reset your password, please click the following link. If you did not request a password reset, "
-                 "disregard this email. This link expires after %d minutes.\n%s" % (MINUTES_BEFORE_TOKEN_EXPIRE, reset_url),
+                 "disregard this email. This link expires after %d minutes.\n%s" % (
+                     MINUTES_BEFORE_TOKEN_EXPIRE, reset_url),
             html=render_template('password_reset_email_contents.html', url=reset_url,
                                  minutes=MINUTES_BEFORE_TOKEN_EXPIRE, username=username, server=SERVER_NAME),
             sender="no-reply@user-api.com",

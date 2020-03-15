@@ -6,6 +6,8 @@ from datetime import timedelta
 # Name the fields/columns that you would like to store data for each user, by listing them in this tuple:
 # DESIRED_FIELDS. There should be at least one element in this tuple. Note the email and password and already fields
 # and do not need to be listed here.
+# This tuple should match the database structure. As in create_table_example.sql, in this example, first_name, last_name
+# and phone_number are the desired fields that the database will store.
 DESIRED_FIELDS = ('first_name', 'last_name', 'phone_number')
 
 # Specify the host URI.

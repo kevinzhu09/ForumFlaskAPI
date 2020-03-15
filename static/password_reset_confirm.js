@@ -20,7 +20,7 @@ function getURLParameter(sParam) {
                     return;
                 }
                 $.ajax({
-                    url: "http://localhost:5000/password",
+                    url: "/password",
                     type: "PUT",
                     contentType: "application/json",
                     dataType: "json",
