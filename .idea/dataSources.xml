@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="sandbox@ideacentre.microfac.com" uuid="0d488109-1f36-45ca-b6ea-af60605ca555">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://ideacentre.microfac.com:5432/sandbox</jdbc-url>
+    </data-source>
+  </component>
+</project>

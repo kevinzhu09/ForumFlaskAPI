@@ -1,11 +1,13 @@
 from datetime import timedelta
 
-# Constants (can modify the first three):
+# Constants (can modify the first five):
 
 
 # Name the fields/columns that you would like to store data for each user, by listing them in this tuple:
 # DESIRED_FIELDS. There should be at least one element in this tuple. Note the email and password and already fields
 # and do not need to be listed here.
+# This tuple should match the database structure. As in create_table_example.sql, in this example, first_name, last_name
+# and phone_number are the desired fields that the database will store.
 DESIRED_FIELDS = ('first_name', 'last_name', 'phone_number')
 
 # Specify the host URI.
@@ -14,6 +16,9 @@ HOST_URI = 'http://localhost:5000'
 
 # Choose the number of minutes before each access token expires with this constant.
 MINUTES_BEFORE_TOKEN_EXPIRE = 20
+
+# Choose the name of the server.
+SERVER_NAME = "Kevin's Database"
 
 # Choose the length of the salt value for password hashing. 32 should be fine.
 SALT_LENGTH = 32
