@@ -33,4 +33,4 @@ TIME_TO_EXPIRE = timedelta(minutes=MINUTES_BEFORE_TOKEN_EXPIRE)
 separator = ', '
 COLUMNS_TO_SELECT = 'user_id, email, ' + separator.join(DESIRED_FIELDS)
 
-COLUMNS_TO_INSERT = separator.join(DESIRED_FIELDS) + ', hash_code, email'
+COLUMNS_TO_INSERT = separator.join(DESIRED_FIELDS) + ', hash_code, email, verified'
