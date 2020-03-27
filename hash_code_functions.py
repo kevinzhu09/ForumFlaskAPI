@@ -1,12 +1,13 @@
 # External modules: hashlib handles hashing the password. os handles random number generation.
 import hashlib
-import os
+
+from os import urandom
 
 from constants import SALT_LENGTH
 
 
 def get_hash_code(password):
-    salt = os.urandom(SALT_LENGTH)
+    salt = urandom(SALT_LENGTH)
     key = calculate_hashed_value(password, salt)
 
     hash_code = salt + key
