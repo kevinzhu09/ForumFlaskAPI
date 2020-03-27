@@ -13,7 +13,7 @@ def format_hash_code(hash_code):
 def insert_user(*values_tuple, conn_info, hash_code, email):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            query = "INSERT INTO users (%s) VALUES (%sE%%s, %%s)" % (COLUMNS_TO_INSERT, '%s, ' * FIELDS_LENGTH)
+            query = "INSERT INTO users (%s) VALUES (%sE%%s, %%s, FALSE)" % (COLUMNS_TO_INSERT, '%s, ' * FIELDS_LENGTH)
 
             parameters_tuple = values_tuple + (format_hash_code(hash_code), email)
             # Uncomment this line for debugging:
@@ -26,7 +26,7 @@ def update_user(*values_tuple, conn_info, email):
         with conn.cursor() as cur:
             update_list = [("%s = %%s" % item) for item in DESIRED_FIELDS]
             update_string = ', '.join(update_list)
-            query = "UPDATE users SET %s WHERE email = %%s" % update_string
+            query = "UPDATE users SET %s WHERE email = %%s AND verified = TRUE" % update_string
 
             parameters_tuple = values_tuple + (email,)
             # Uncomment this line for debugging:
@@ -37,14 +37,14 @@ def update_user(*values_tuple, conn_info, email):
 def delete_user(conn_info, email):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM users WHERE email = %s", (email,))
+            cur.execute("DELETE FROM users WHERE email = %s AND verified = TRUE", (email,))
 
 
 def update_hash_code(conn_info, hash_code, email):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
             hex_hash_code = format_hash_code(hash_code)
-            cur.execute("UPDATE users SET hash_code = E%s WHERE email = %s", (hex_hash_code, email))
+            cur.execute("UPDATE users SET hash_code = E%s WHERE email = %s AND verified = TRUE", (hex_hash_code, email))
 
 
 # Helper function for select_all_users and select_one_user that converts a data record from the cursor into a more
@@ -56,7 +56,7 @@ def get_dict_from_record(record):
 def select_all_users(conn_info):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT %s FROM users" % COLUMNS_TO_SELECT)
+            cur.execute("SELECT %s FROM users WHERE verified = TRUE" % COLUMNS_TO_SELECT)
             records = cur.fetchall()
             return [get_dict_from_record(record) for record in records] if records else None
 
@@ -64,7 +64,7 @@ def select_all_users(conn_info):
 def select_one_user(conn_info, column, value):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT %s FROM users WHERE %s = %%s" % (COLUMNS_TO_SELECT, column), (value,))
+            cur.execute("SELECT %s FROM users WHERE %s = %%s AND verified = TRUE" % (COLUMNS_TO_SELECT, column), (value,))
             record = cur.fetchone()
             return get_dict_from_record(record) if record else None
 
@@ -72,7 +72,7 @@ def select_one_user(conn_info, column, value):
 def select_hash_code(conn_info, email):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT hash_code FROM users WHERE email = %s", (email,))
+            cur.execute("SELECT hash_code FROM users WHERE email = %s AND verified = TRUE", (email,))
             row = cur.fetchone()
             return row[0].tobytes() if row else None
 
@@ -80,12 +80,18 @@ def select_hash_code(conn_info, email):
 def user_exists(conn_info, column, value):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT EXISTS (SELECT * FROM users WHERE %s = %%s)" % column, (value,))
+            cur.execute("SELECT EXISTS (SELECT * FROM users WHERE %s = %%s AND verified = TRUE)" % column, (value,))
             return cur.fetchone()[0]
 
 
 def email_exists(conn_info, email):
     return user_exists(conn_info, 'email', email)
+
+
+def verify_user(conn_info, email, hash_code):
+    with get_conn(*conn_info) as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE users SET verified = TRUE WHERE email = %s AND hash_code = %s AND verified = FALSE", (email, hash_code))
 
 
 def get_conn(dbname, dbusername, dbpassword, dbhost, dbport):

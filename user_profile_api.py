@@ -4,8 +4,8 @@
 # requirements.txt should be in the same folder as this file. It lists the dependencies to install for this application.
 #
 # Additional modules part of this API:
-# SQL_commands.py, which contains the SQL functions to work with PostgreSQL and the pgAdmin database.
-# db_config.json, which contains the sensitive configuration info to connect to PostgreSQL and the pgAdmin database.
+# users_table_SQL.py, which contains the SQL functions to work with the PostgreSQL database.
+# db_config.json, which contains the sensitive configuration info to connect to the PostgreSQL database.
 # mail_JWT_config.json, which contains the mail client and JWT configuration info.
 # hash_code_functions.py, which contains the functions for storing the user password in a hash code.
 # constants.py, which contains the constants including fields, which can be modified.
@@ -13,7 +13,7 @@
 # This app requires Python 3.7 or later.
 
 from hash_code_functions import *
-from SQL_commands import *
+from users_table_SQL import *
 
 # External modules: flask handles the URI routes for the API requests. It also allows JSON to be easily written.
 # flask_jwt_extended handles the JSON Web Tokens (JWT) integration which is used for login verification.
@@ -44,7 +44,7 @@ app.config['MAIL_USE_SSL'] = mail_JWT_data['MAIL_USE_SSL']
 jwt = JWTManager(app)
 mail = Mail(app)
 
-# With the information from db_config.json, configure the connection to PostgreSQL and the pgAdmin database.
+# With the information from db_config.json, configure the connection to the PostgreSQL database.
 # Saves the connection information in a tuple.
 
 with open('db_config.json') as file:
