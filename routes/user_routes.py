@@ -1,11 +1,10 @@
-from SQL_functions.users_table_SQL import *
+from routes.SQL_functions.users_table_SQL import *
 from routes.routes_config import *
 
-from constants import APP_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE, DESIRED_FIELDS
+from constants import TIME_TO_EXPIRE, DESIRED_FIELDS
 from hash_code_functions import *
-from flask import jsonify, send_from_directory, render_template, request, Blueprint
+from flask import jsonify, send_from_directory, request, Blueprint
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
-from flask_mail import Message, Mail
 
 basedir = path.abspath(path.dirname(__file__))
 user_routes = Blueprint('user_routes', __name__, template_folder=path.join(basedir, '../templates'))
@@ -157,3 +156,39 @@ def change_password():
             return jsonify(message="That user does not exist or is not the requester.", code=3), 404
     else:
         return jsonify(message="Unauthorized request to change password.", code=4), 401
+
+
+@user_routes.route('/authors/likes', methods=["GET"])
+@jwt_required
+def liked_authors():
+    user_id = get_jwt_identity().get("user_id")
+    if check_verified(conn_info, user_id):
+        authors_list = select_liked_authors(conn_info, user_id)
+        if authors_list:
+            return jsonify(authors=authors_list, code=0)
+        else:
+            return jsonify(message="Authors do not exist.", code=1), 404
+    else:
+        return jsonify(message="Unauthorized request to view authors.", code=2), 401
+
+
+@user_routes.route('/authors/likes/<int:author_id>', methods=["POST"])
+@jwt_required
+def like_authors(author_id: int):
+    user_id = get_jwt_identity().get("user_id")
+    if select_liked_author(conn_info, author_id, user_id):
+        return jsonify(message="Author is already liked.", code=0)
+    else:
+        insert_liked_author(conn_info, author_id, user_id)
+        return jsonify(message="Author has been liked.", code=0)
+
+
+@user_routes.route('/authors/likes/<int:author_id>', methods=["DELETE"])
+@jwt_required
+def unlike_authors(author_id: int):
+    user_id = get_jwt_identity().get("user_id")
+    if select_liked_author(conn_info, author_id, user_id):
+        delete_liked_author(conn_info, author_id, user_id)
+        return jsonify(message="Author has been unliked.", code=0)
+    else:
+        return jsonify(message="Author is already unliked.", code=0)
