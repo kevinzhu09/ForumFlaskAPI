@@ -1,3 +1,5 @@
+# External modules: psycopg2 connects to the database. json loads .json files.
+import psycopg2
 from flask import request
 from json import load
 from os import path
@@ -11,13 +13,13 @@ db_filename = path.join(dirname, 'db_config.json')
 with open(db_filename) as file:
     db_data = load(file)
 
-dbname = db_data['dbname']
-dbusername = db_data['dbusername']
-dbpassword = db_data['dbpassword']
-dbhost = db_data['dbhost']
-dbport = db_data['dbport']
+db_name = db_data['dbname']
+db_username = db_data['dbusername']
+db_password = db_data['dbpassword']
+db_host = db_data['dbhost']
+db_port = db_data['dbport']
 
-conn_info = (dbname, dbusername, dbpassword, dbhost, dbport)
+conn_info = (db_name, db_username, db_password, db_host, db_port)
 
 
 # Helper function for the API. It allows the API to accept requests in either JSON or through form-data.
@@ -32,3 +34,18 @@ def request_dynamic(request_is_json, allow_null=False):
             return lambda value: request.json[value]
         else:
             return lambda value: request.form[value]
+
+
+def get_conn(dbname, dbusername, dbpassword, dbhost, dbport):
+    conn = psycopg2.connect(
+        "dbname='%s' user='%s' password='%s' host='%s' port='%s'" % (
+            dbname, dbusername, dbpassword, dbhost, dbport))
+    conn.autocommit = True
+    return conn
+
+
+def check_verified(conn, user_id):
+    with get_conn(*conn) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT username FROM users WHERE user_id = %s AND verified = TRUE", (user_id,))
+            return cur.fetchone()[0]

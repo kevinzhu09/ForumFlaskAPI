@@ -1,4 +1,5 @@
-from SQL_functions.posts_table_SQL import *
+from routes.SQL_functions.posts_table_SQL import *
+from routes.SQL_functions.users_table_SQL import select_liked_author
 from flask import jsonify, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from routes.routes_config import *
@@ -57,7 +58,7 @@ def post_details(post_id: int):
         author_id = post['author_id']
         user_id = get_jwt_identity().get("user_id")
         own_post = author_id == user_id
-        return jsonify(post_details=post, own_post=own_post, liked_status=select_like(conn_info, post_id, user_id),
+        return jsonify(post_details=post, own_post=own_post, liked_status=select_liked_post(conn_info, post_id, user_id),
                        code=0)
     else:
         return jsonify(message="That post does not exist.", code=1), 404
@@ -92,7 +93,7 @@ def author_posts(author_id: int):
         posts_list = posts_list_and_username[0]
         author_username = posts_list_and_username[1]
         if posts_list:
-            return jsonify(posts=posts_list, authorUsername=author_username, code=0, ownPage=False, id=user_id)
+            return jsonify(posts=posts_list, authorUsername=author_username, code=0, ownPage=False, id=user_id, liked_status=select_liked_author(conn_info, author_id, user_id),)
         elif author_username:
             return jsonify(message="That author's posts do not exist.", authorUsername=author_username, code=1), 404
         else:
@@ -120,10 +121,10 @@ def liked_posts():
 @jwt_required
 def like_posts(post_id: int):
     user_id = get_jwt_identity().get("user_id")
-    if select_like(conn_info, post_id, user_id):
+    if select_liked_post(conn_info, post_id, user_id):
         return jsonify(message="Post is already liked.", code=0)
     else:
-        insert_like(conn_info, post_id, user_id)
+        insert_liked_post(conn_info, post_id, user_id)
         return jsonify(message="Post has been liked.", code=0)
 
 
@@ -131,8 +132,8 @@ def like_posts(post_id: int):
 @jwt_required
 def unlike_posts(post_id: int):
     user_id = get_jwt_identity().get("user_id")
-    if select_like(conn_info, post_id, user_id):
-        delete_like(conn_info, post_id, user_id)
+    if select_liked_post(conn_info, post_id, user_id):
+        delete_liked_post(conn_info, post_id, user_id)
         return jsonify(message="Post has been unliked.", code=0)
     else:
         return jsonify(message="Post is already unliked.", code=0)
@@ -141,4 +142,4 @@ def unlike_posts(post_id: int):
 # @jwt_required
 # def post_liked_status(post_id: int):
 #     user_id = get_jwt_identity().get("user_id")
-#     return jsonify(liked_status=select_like(conn_info, post_id, user_id), code=0)
+#     return jsonify(liked_status=select_liked_post(conn_info, post_id, user_id), code=0)

@@ -29,11 +29,18 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE UNIQUE INDEX posts_author_title_constraint ON posts (author_id, title)
     WHERE NOT deleted;
 
-CREATE TABLE IF NOT EXISTS likes (
+CREATE TABLE IF NOT EXISTS liked_posts (
     post_id INTEGER NOT NULL REFERENCES posts (post_id),
     user_id INTEGER NOT NULL REFERENCES users (user_id),
     created_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (post_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS liked_authors (
+    author_id INTEGER NOT NULL REFERENCES users (user_id),
+    user_id INTEGER NOT NULL REFERENCES users (user_id),
+    created_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (author_id, user_id)
 );
 
 SELECT * FROM users;

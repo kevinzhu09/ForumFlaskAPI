@@ -16,24 +16,20 @@
 # flask_jwt_extended handles the JSON Web Tokens (JWT) integration which is used for login verification.
 # flask_mail handles the mail server.
 # json helps for reading .json files.
-from flask import Flask, jsonify, render_template
-from flask_jwt_extended import JWTManager, create_access_token
-from flask_mail import Mail
-from json import load
-from os import path
+from flask import Flask
+from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from constants import APP_URI
 
 from routes.user_routes import user_routes, get_fields_from_request
 from routes.post_routes import post_routes
 from routes.routes_config import *
 
-from SQL_functions.users_table_SQL import *
+from routes.SQL_functions.users_table_SQL import *
 
-from constants import APP_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE, DESIRED_FIELDS
+from constants import APP_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
 from hash_code_functions import *
-from flask import jsonify, send_from_directory, render_template, request, Blueprint
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask import jsonify, render_template, request
+from flask_jwt_extended import create_access_token
 from flask_mail import Message, Mail
 
 # Configuration for the Flask app, JWT integration and mail server:
