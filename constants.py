@@ -39,4 +39,14 @@ COLUMNS_TO_INSERT = 'hash_code, email, username, ' + separator.join(DESIRED_FIEL
 # username. verified is always given FALSE. hash code is formatted differently because it is a byte array.
 FIELDS_LENGTH = len(DESIRED_FIELDS) + 2
 
-POST_INFO_TO_SELECT = "P.post_id, U.username, P.title, P.created_timestamp"
+POSTS_INFO_TO_SELECT = "P.post_id, P.author_id, P.title, U.username, P.created_timestamp"
+
+POSTS_KEYS = ('post_id', 'author_id', 'title', 'username', 'created_timestamp')
+
+SINGLE_POST_INFO_TO_SELECT = "P.author_id, P.title, U.username, P.created_timestamp, P.content"
+
+SINGLE_POST_KEYS = ('author_id', 'title', 'username', 'created_timestamp', 'content')
+
+AUTHOR_POST_INFO_TO_SELECT = "post_id, title, created_timestamp"
+
+AUTHOR_POST_KEYS = ('post_id', 'title', 'created_timestamp')
