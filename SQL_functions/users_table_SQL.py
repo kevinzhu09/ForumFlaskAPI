@@ -13,19 +13,20 @@ def format_hash_code(hash_code):
 def insert_user(*values_tuple, conn_info, hash_code, email, username):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            query = "INSERT INTO users (%s) VALUES (E%%s, %sFALSE)" % (COLUMNS_TO_INSERT, '%s, ' * FIELDS_LENGTH)
+            query = "INSERT INTO users (%s) VALUES (E%%s, %sFALSE) RETURNING user_id" % (COLUMNS_TO_INSERT, '%s, ' * FIELDS_LENGTH)
 
             parameters_tuple = (format_hash_code(hash_code), email, username) + values_tuple
             # Uncomment this line for debugging:
             print('Query: ', query, '\nParameters tuple: ', parameters_tuple)
             cur.execute(query, parameters_tuple)
+            return cur.fetchone()[0]
 
 
-def verify_user(conn_info, email):
+def verify_user(conn_info, email, unverified_user_id):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            query = ("UPDATE users SET verified = TRUE WHERE email = %s AND verified = FALSE")
-            parameters_tuple = (email, )
+            query = ("UPDATE users SET verified = TRUE WHERE email = %s AND verified = FALSE AND user_id = %s")
+            parameters_tuple = (email, unverified_user_id)
             # Uncomment this line for debugging:
             print('Query: ', query, '\nParameters tuple: ', parameters_tuple)
             cur.execute(query, parameters_tuple)
@@ -101,10 +102,10 @@ def select_hash_code_and_id(conn_info, email):
             return (row[0].tobytes(), row[1]) if row else None
 
 
-def select_hash_code_from_unverified(conn_info, email):
+def select_hash_code_from_unverified(conn_info, email, unverified_user_id):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT hash_code, user_id FROM users WHERE email = %s AND verified = FALSE", (email,))
+            cur.execute("SELECT hash_code FROM users WHERE email = %s AND verified = FALSE AND user_id = %s", (email, unverified_user_id))
             row = cur.fetchone()
             return row[0].tobytes() if row else None
 
