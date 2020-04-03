@@ -36,12 +36,9 @@ def verify_account():
 
             rows_affected = verify_user(conn_info, email, unverified_user_id)
             if rows_affected == 1:
-                return jsonify(message="User verified successfully.", code=0)
+                access_token = create_access_token(identity={"user_id": unverified_user_id}, expires_delta=TIME_TO_EXPIRE)
+                return jsonify(message="User verified successfully. Access token returned.", access_token=access_token, code=0)
             else:
-                # debugging:
-                print(email)
-                print(password)
-                print(rows_affected)
                 return jsonify(
                     message="That user is verified, does not exist or is not the requester, or some other issue.",
                     code=1), 404
