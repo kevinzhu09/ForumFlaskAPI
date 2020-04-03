@@ -3,3 +3,4 @@
 .idea/
 *__pycache__*
 venv/
+*/mail_JWT_config.json
