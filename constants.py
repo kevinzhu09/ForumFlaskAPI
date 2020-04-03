@@ -13,6 +13,7 @@ DESIRED_FIELDS = ('first_name', 'last_name')
 API_URI = 'http://localhost:5000'
 # Specify the app URI (I used create-react-app).
 APP_URI = 'http://localhost:3000'
+# APP_URI = 'http://localhost'
 
 
 # Choose the number of minutes before each access token expires with this constant.
