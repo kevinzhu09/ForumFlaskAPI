@@ -1,6 +1,5 @@
 #ignore files
 */db_config.json
-.idea/*
-*/__pycache__/
-*/__pycache__/*
+.idea/
+__pycache__/
 venv/
