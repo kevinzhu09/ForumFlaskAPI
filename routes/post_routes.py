@@ -15,7 +15,7 @@ def create_post():
     if author_id:
         title = request_dynamic(request.is_json)('title')
         content = request_dynamic(request.is_json)('content')
-        post_id = insert_post(conn_info=conn_info, author_id=author_id, title=title, content=content)
+        post_id = insert_post(conn=conn_info, author_id=author_id, title=title, content=content)
         return jsonify(message="Post created successfully.", post_id=post_id, code=0), 201
     else:
         return jsonify(message="Unauthorized request to create post.", code=1), 401

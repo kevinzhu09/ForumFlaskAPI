@@ -72,7 +72,7 @@ def login():
 def modify_user():
     user_id = get_jwt_identity().get("user_id")
     values_list = get_fields_from_request()
-    rows_affected = update_user(*values_list, conn_info=conn_info, user_id=user_id)
+    rows_affected = update_user(*values_list, conn=conn_info, user_id=user_id)
     if rows_affected == 1:
         return jsonify(message="You updated a user.")
     else:
