@@ -16,7 +16,7 @@ APP_URI = 'http://localhost:3000'
 
 
 # Choose the number of minutes before each access token expires with this constant.
-MINUTES_BEFORE_TOKEN_EXPIRE = 20
+MINUTES_BEFORE_TOKEN_EXPIRE = 30
 
 # Choose the name of the server.
 SERVER_NAME = "Kevin's Database"

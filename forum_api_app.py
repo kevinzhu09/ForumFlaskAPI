@@ -82,7 +82,7 @@ def register():
         values_list = get_fields_from_request()
         password = request_dynamic(request.is_json)('password')
         hash_code = get_hash_code(password)
-        unverified_user_id = insert_user(*values_list, conn_info=conn_info, hash_code=hash_code, email=email,
+        unverified_user_id = insert_user(*values_list, conn=conn_info, hash_code=hash_code, email=email,
                                          username=username)
 
         access_token = create_access_token(
