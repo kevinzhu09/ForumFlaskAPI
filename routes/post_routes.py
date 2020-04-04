@@ -8,7 +8,7 @@ basedir = path.abspath(path.dirname(__file__))
 post_routes = Blueprint('post_routes', __name__, template_folder=path.join(basedir, '../templates'))
 
 
-@post_routes.route('/posts', methods=['POST'])
+@post_routes.route('/api/posts', methods=['POST'])
 @jwt_required
 def create_post():
     author_id = get_jwt_identity().get("user_id")
@@ -21,7 +21,7 @@ def create_post():
         return jsonify(message="Unauthorized request to create post.", code=1), 401
 
 
-@post_routes.route('/posts/<int:post_id>', methods=['DELETE'])
+@post_routes.route('/api/posts/<int:post_id>', methods=['DELETE'])
 @jwt_required
 def remove_post(post_id: int):
     author_id = get_jwt_identity().get("user_id")
@@ -35,7 +35,7 @@ def remove_post(post_id: int):
         return jsonify(message="Unauthorized request to delete post.", code=2), 401
 
 
-@post_routes.route('/posts/<int:post_id>', methods=['PUT'])
+@post_routes.route('/api/posts/<int:post_id>', methods=['PUT'])
 @jwt_required
 def modify_post(post_id: int):
     author_id = get_jwt_identity().get("user_id")
@@ -50,7 +50,7 @@ def modify_post(post_id: int):
         return jsonify(message="Unauthorized request to modify post."), 401
 
 
-@post_routes.route('/posts/<int:post_id>', methods=["GET"])
+@post_routes.route('/api/posts/<int:post_id>', methods=["GET"])
 @jwt_required
 def post_details(post_id: int):
     post = select_post_including_content(conn_info, post_id)
@@ -64,7 +64,7 @@ def post_details(post_id: int):
         return jsonify(message="That post does not exist.", code=1), 404
 
 
-@post_routes.route('/posts', methods=["GET"])
+@post_routes.route('/api/posts', methods=["GET"])
 @jwt_required
 def posts():
     user_id = get_jwt_identity().get("user_id")
@@ -79,7 +79,7 @@ def posts():
         return jsonify(message="Unauthorized request to view posts.", code=2), 401
 
 
-@post_routes.route('/authors/<int:author_id>', methods=["GET"])
+@post_routes.route('/api/authors/<int:author_id>', methods=["GET"])
 @jwt_required
 def author_posts(author_id: int):
     user_id = get_jwt_identity().get("user_id")
@@ -102,7 +102,7 @@ def author_posts(author_id: int):
         return jsonify(message="Unauthorized request to view posts.", code=3), 401
 
 
-@post_routes.route('/posts/likes', methods=["GET"])
+@post_routes.route('/api/posts/likes', methods=["GET"])
 @jwt_required
 def liked_posts():
     user_id = get_jwt_identity().get("user_id")
@@ -117,7 +117,7 @@ def liked_posts():
         return jsonify(message="Unauthorized request to view posts.", code=2), 401
 
 
-@post_routes.route('/posts/likes/<int:post_id>', methods=["POST"])
+@post_routes.route('/api/posts/likes/<int:post_id>', methods=["POST"])
 @jwt_required
 def like_posts(post_id: int):
     user_id = get_jwt_identity().get("user_id")
@@ -128,7 +128,7 @@ def like_posts(post_id: int):
         return jsonify(message="Post has been liked.", code=0)
 
 
-@post_routes.route('/posts/likes/<int:post_id>', methods=["DELETE"])
+@post_routes.route('/api/posts/likes/<int:post_id>', methods=["DELETE"])
 @jwt_required
 def unlike_posts(post_id: int):
     user_id = get_jwt_identity().get("user_id")
@@ -138,7 +138,7 @@ def unlike_posts(post_id: int):
     else:
         return jsonify(message="Post is already unliked.", code=0)
 
-# @post_routes.route('/posts/likes/<int:post_id>', methods=["GET"])
+# @post_routes.route('/api/posts/likes/<int:post_id>', methods=["GET"])
 # @jwt_required
 # def post_liked_status(post_id: int):
 #     user_id = get_jwt_identity().get("user_id")

@@ -9,12 +9,17 @@ from datetime import timedelta
 # in this example, first_name and last_name are the desired fields that the database will store.
 DESIRED_FIELDS = ('first_name', 'last_name')
 
+
 # Specify the API URI.
-API_URI = 'http://localhost:5000'
+# API_URI = 'http://localhost:5000'
 # Specify the app URI (I used create-react-app).
 APP_URI = 'http://localhost:3000'
 # APP_URI = 'http://localhost'
 
+# APP_URI = 'http://kevinzhu.me'
+# APP_URI = '*'
+
+APP_URI_LIST = ['http://localhost', 'http://kevinzhu.me', 'http://localhost:3000']
 
 # Choose the number of minutes before each access token expires with this constant.
 MINUTES_BEFORE_TOKEN_EXPIRE = 30

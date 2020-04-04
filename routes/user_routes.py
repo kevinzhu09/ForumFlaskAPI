@@ -15,7 +15,7 @@ def get_fields_from_request():
     return [request_dynamic(request.is_json, allow_null=True)(attribute) for attribute in DESIRED_FIELDS]
 
 
-@user_routes.route('/verify', methods=['PUT'])
+@user_routes.route('/api/verify', methods=['PUT'])
 @jwt_required
 def verify_account():
     identity = get_jwt_identity()
@@ -48,7 +48,7 @@ def verify_account():
         return jsonify(message="Unauthorized request to verify account.", code=4), 401
 
 
-@user_routes.route('/login', methods=['POST'])
+@user_routes.route('/api/login', methods=['POST'])
 def login():
     email = request_dynamic(request.is_json)('email')
     password = request_dynamic(request.is_json)('password')
@@ -64,7 +64,7 @@ def login():
     return jsonify(message="Invalid email or password.", code=1), 401
 
 
-@user_routes.route('/users', methods=['PUT'])
+@user_routes.route('/api/users', methods=['PUT'])
 @jwt_required
 def modify_user():
     user_id = get_jwt_identity().get("user_id")
@@ -76,7 +76,7 @@ def modify_user():
         return jsonify(message="That user does not exist."), 404
 
 
-@user_routes.route('/users', methods=['DELETE'])
+@user_routes.route('/api/users', methods=['DELETE'])
 @jwt_required
 def remove_user():
     user_id = get_jwt_identity().get("user_id")
@@ -91,7 +91,7 @@ def remove_user():
         return jsonify(message="Incorrect password.", code=1), 401
 
 
-@user_routes.route('/users/<int:user_id>', methods=["GET"])
+@user_routes.route('/api/users/<int:user_id>', methods=["GET"])
 @jwt_required
 def user_details_by_id(user_id: int):
     user = select_one_user(conn_info, 'user_id', user_id)
@@ -101,7 +101,7 @@ def user_details_by_id(user_id: int):
         return jsonify(message="That user does not exist."), 404
 
 
-@user_routes.route('/users', methods=["GET"])
+@user_routes.route('/api/users', methods=["GET"])
 @jwt_required
 def user_details():
     email = request.args.get('email')
@@ -119,12 +119,12 @@ def user_details():
             return jsonify(message="There are no users.")
 
 
-@user_routes.route('/password/reset/confirm/', methods=['GET'])
+@user_routes.route('/api/password/reset/confirm/', methods=['GET'])
 def password_reset_confirm():
     return send_from_directory(directory='static', filename='password_reset_confirm.html')
 
 
-@user_routes.route('/password', methods=['PUT'])
+@user_routes.route('/api/password', methods=['PUT'])
 @jwt_required
 def change_password():
     identity = get_jwt_identity()
@@ -155,7 +155,7 @@ def change_password():
         return jsonify(message="Unauthorized request to change password.", code=4), 401
 
 
-@user_routes.route('/authors/likes', methods=["GET"])
+@user_routes.route('/api/authors/likes', methods=["GET"])
 @jwt_required
 def liked_authors():
     user_id = get_jwt_identity().get("user_id")
@@ -169,7 +169,7 @@ def liked_authors():
         return jsonify(message="Unauthorized request to view authors.", code=2), 401
 
 
-@user_routes.route('/authors/likes/<int:author_id>', methods=["POST"])
+@user_routes.route('/api/authors/likes/<int:author_id>', methods=["POST"])
 @jwt_required
 def like_authors(author_id: int):
     user_id = get_jwt_identity().get("user_id")
@@ -180,7 +180,7 @@ def like_authors(author_id: int):
         return jsonify(message="Author has been liked.", code=0)
 
 
-@user_routes.route('/authors/likes/<int:author_id>', methods=["DELETE"])
+@user_routes.route('/api/authors/likes/<int:author_id>', methods=["DELETE"])
 @jwt_required
 def unlike_authors(author_id: int):
     user_id = get_jwt_identity().get("user_id")

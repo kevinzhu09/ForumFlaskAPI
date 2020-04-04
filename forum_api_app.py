@@ -37,7 +37,7 @@ basedir = path.abspath(path.dirname(__file__))
 
 app = Flask(__name__, template_folder=path.join(basedir, '/templates'))
 
-cors = CORS(app, resources={r"/*": {"origins": APP_URI}})
+cors = CORS(app, resources={r"/api/*": {"origins": APP_URI}})
 
 # with open(path.join(basedir, 'mail_JWT_config.json')) as file:
 #     mail_JWT_data = load(file)
@@ -67,7 +67,7 @@ app.register_blueprint(post_routes)
 # added to for each error. If the code != 0, then a 409 error or some other error is returned. The recipient of this
 # request can check with javascript or some language which errors happened. if the code is code=7=1110, then it can
 # be checked with: code=7 && 1 | code && 2 | code && 4 | code && 8 | etc.
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register():
     email = request_dynamic(request.is_json)('email')
     username = request_dynamic(request.is_json)('username')
@@ -103,7 +103,7 @@ def register():
         return jsonify(message="User created successfully. Verification email sent to %s." % email, code=0), 201
 
 
-@app.route('/password/reset', methods=['POST'])
+@app.route('/api/password/reset', methods=['POST'])
 def password_reset():
     email = request_dynamic(request.is_json)('email')
     if email_exists(conn_info, email):
