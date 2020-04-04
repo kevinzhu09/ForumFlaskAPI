@@ -12,12 +12,13 @@ DESIRED_FIELDS = ('first_name', 'last_name')
 
 # Specify the API URI.
 # API_URI = 'http://localhost:5000'
+API_URI = 'http://kevin.microfac.com'
 # Specify the app URI (I used create-react-app).
-APP_URI = 'http://localhost:3000'
+# APP_URI = 'http://localhost:3000'
 # APP_URI = 'http://localhost'
 
 # APP_URI = 'http://kevinzhu.me'
-# APP_URI = '*'
+APP_URI = '*'
 
 APP_URI_LIST = ['http://localhost', 'http://kevinzhu.me', 'http://localhost:3000']
 
@@ -25,7 +26,7 @@ APP_URI_LIST = ['http://localhost', 'http://kevinzhu.me', 'http://localhost:3000
 MINUTES_BEFORE_TOKEN_EXPIRE = 30
 
 # Choose the name of the server.
-SERVER_NAME = "Kevin's Database"
+SERVER_NAME = "Kevin's Forum"
 
 # Choose the length of the salt value for password hashing. 32 should be fine.
 SALT_LENGTH = 32

@@ -26,7 +26,7 @@ from routes.routes_config import *
 
 from routes.SQL_functions.users_table_SQL import *
 
-from constants import APP_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
+from constants import APP_URI, API_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
 from hash_code_functions import *
 from flask import jsonify, render_template, request
 from flask_jwt_extended import create_access_token
@@ -88,12 +88,12 @@ def register():
         access_token = create_access_token(
             identity={"email": email, "username": username, "unverified_user_id": unverified_user_id},
             expires_delta=TIME_TO_EXPIRE)
-        reset_url = APP_URI + "/verify?token=" + access_token
+        verify_url = API_URI + "/verify?token=" + access_token
         msg = Message(
             body="To verify your account, please click the following link. If you did not create an account with us "
                  "recently, disregard this email. This link expires after %d minutes.\n%s" % (
-                     MINUTES_BEFORE_TOKEN_EXPIRE, reset_url),
-            html=render_template('verification_email.html', url=reset_url,
+                     MINUTES_BEFORE_TOKEN_EXPIRE, verify_url),
+            html=render_template('verification_email.html', url=verify_url,
                                  minutes=MINUTES_BEFORE_TOKEN_EXPIRE, username=username, server=SERVER_NAME),
             sender="no-reply@user-api.com",
             recipients=[email],
