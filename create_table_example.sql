@@ -93,3 +93,41 @@ Black Panther
 Avengers: Infinity War
 Ant-Man and the Wasp
 Captain Marvel');
+
+DROP FUNCTION get_all_users();
+
+CREATE OR REPLACE FUNCTION get_all_users()
+  RETURNS TABLE(_userId INTEGER, _email VARCHAR, _username VARCHAR) AS $$
+BEGIN
+ RETURN QUERY
+ 
+ SELECT user_id, email, username FROM users WHERE verified = TRUE;
+
+END; $$
+ 
+LANGUAGE plpgsql;
+
+SELECT get_all_users();
+
+SELECT * FROM users;
+
+DROP PROCEDURE insert(VARCHAR, VARCHAR, VARCHAR);
+CREATE OR REPLACE PROCEDURE insert(VARCHAR, VARCHAR, VARCHAR)
+LANGUAGE plpgsql    
+AS $$
+BEGIN
+    INSERT INTO users (hash_code, email, username, verified, first_name, last_name) VALUES
+(E'ABCABC', 'user1@john.com', $1, TRUE, 'John', 'Frederick');
+INSERT INTO users (hash_code, email, username, verified, first_name, last_name) VALUES
+(E'ABCABC', 'user2@john.com', $2, TRUE, 'Josh', 'Frederick');
+INSERT INTO users (hash_code, email, username, verified, first_name, last_name) VALUES
+(E'ABCABC', 'user3@john.com', $3, TRUE, 'Drew', 'Frederick');
+    
+ 
+    COMMIT;
+END;
+$$;
+
+
+CALL insert('usera','userb','userc');
+
