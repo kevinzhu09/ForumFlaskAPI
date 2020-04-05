@@ -118,11 +118,6 @@ def user_details():
             return jsonify(message="There are no users.")
 
 
-@user_routes.route('/api/password/reset/confirm/', methods=['GET'])
-def password_reset_confirm():
-    return send_from_directory(directory='static', filename='password_reset_confirm.html')
-
-
 @user_routes.route('/api/password', methods=['PUT'])
 @jwt_required
 def change_password():
@@ -145,9 +140,11 @@ def change_password():
             return jsonify(message="Incorrect old password.", code=2), 400
     elif email:
         # user changing their password and clicked the reset link
-        rows_affected = update_hash_code(conn_info, new_hash_code, email=email)
+        rows_affected = update_hash_code(conn_info, new_hash_code, email=email)[0]
         if rows_affected == 1:
-            return jsonify(message="Password changed successfully.")
+            user_id = update_hash_code(conn_info, new_hash_code, email=email)[1]
+            access_token = create_access_token(identity={"user_id": user_id}, expires_delta=TIME_TO_EXPIRE)
+            return jsonify(message="Password reset successfully. Access token returned.", access_token=access_token, code=0)
         else:
             return jsonify(message="That user does not exist or is not the requester.", code=3), 404
     else:
