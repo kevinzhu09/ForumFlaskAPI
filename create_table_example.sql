@@ -43,9 +43,30 @@ CREATE TABLE IF NOT EXISTS liked_authors (
     PRIMARY KEY (author_id, user_id)
 );
 
+
+CREATE OR REPLACE PROCEDURE delete_user(INT)
+LANGUAGE plpgsql    
+AS $$
+BEGIN
+
+	DELETE FROM liked_posts WHERE user_id = $1;
+	DELETE FROM liked_authors WHERE user_id = $1;
+	DELETE FROM posts WHERE author_id = $1;
+	DELETE FROM users WHERE user_id = $1 AND verified = TRUE;
+
+	COMMIT;
+
+END;
+$$;
+
+
+CALL delete_user(3);
+
 SELECT * FROM users;
 SELECT * FROM posts;
-UPDATE users SET verified = TRUE WHERE verified = FALSE;
+SELECT * FROM liked_posts;
+SELECT * FROM liked_authors;
+UPDATE users SET verified = TRUE WHERE verified = FALSE AND user_id = 22;
 SELECT hash_code, user_id FROM users WHERE email = 'kevinzoolu@gmail.com' AND verified = TRUE;
 
 -- populate the users table:

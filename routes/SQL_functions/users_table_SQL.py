@@ -50,8 +50,7 @@ def update_user(*values_tuple, conn, user_id):
 def delete_user(conn, user_id):
     with get_conn(*conn) as conn:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM users WHERE user_id = %s AND verified = TRUE", (user_id,))
-            return cur.rowcount
+            cur.execute("CALL delete_user(%s);", (user_id,))
 
 
 def update_hash_code(conn, hash_code, email=None, user_id=None):

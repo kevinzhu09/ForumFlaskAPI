@@ -18,9 +18,10 @@ API_URI = 'https://kevin.microfac.com'
 # APP_URI = 'http://localhost'
 
 # APP_URI = 'http://kevinzhu.me'
-APP_URI = 'https://kevin.microfac.com'
+# APP_URI = 'https://kevin.microfac.com'
 
-# APP_URI_LIST = ['https://localhost', 'https://localhost:3000']
+# APP_URI_LIST = ['https://kevin.microfac.com', 'https://localhost', 'https://localhost:3000']
+APP_URI_LIST = ['https://kevin.microfac.com', 'http://localhost', 'http://localhost:3000']
 
 # Choose the number of minutes before each access token expires with this constant.
 MINUTES_BEFORE_TOKEN_EXPIRE = 30
