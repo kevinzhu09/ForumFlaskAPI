@@ -26,7 +26,7 @@ from routes.routes_config import *
 
 from routes.SQL_functions.users_table_SQL import *
 
-from constants import APP_URI, APP_URI_LIST, API_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
+from constants import APP_URI_LIST, APP_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
 from hash_code_functions import *
 from flask import jsonify, render_template, request
 from flask_jwt_extended import create_access_token
@@ -88,7 +88,7 @@ def register():
         access_token = create_access_token(
             identity={"email": email, "username": username, "unverified_user_id": unverified_user_id},
             expires_delta=TIME_TO_EXPIRE)
-        verify_url = API_URI + "/verify?token=" + access_token
+        verify_url = APP_URI + "/verify?token=" + access_token
         msg = Message(
             body="To verify your account, please click the following link. If you did not create an account with us "
                  "recently, disregard this email. This link expires after %d minutes.\n%s" % (
@@ -121,7 +121,9 @@ def password_reset():
             subject="Password Reset Link for " + SERVER_NAME)
         mail.send(msg)
 
-    return jsonify(message="Email sent to %s." % email), 202
+        return jsonify(message="Email sent to %s." % email, code=0), 202
+    else:
+        return jsonify(message="Email not found.", code=1), 404
 
 
 if __name__ == '__main__':

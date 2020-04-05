@@ -11,8 +11,8 @@ DESIRED_FIELDS = ('first_name', 'last_name')
 
 
 # Specify the API URI.
-# API_URI = 'http://localhost:5000'
-API_URI = 'https://kevin.microfac.com'
+# APP_URI = 'http://localhost:3000'
+APP_URI = 'https://kevin.microfac.com'
 # Specify the app URI (I used create-react-app).
 # APP_URI = 'http://localhost:3000'
 # APP_URI = 'http://localhost'

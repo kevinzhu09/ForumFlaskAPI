@@ -60,12 +60,13 @@ def update_hash_code(conn, hash_code, email=None, user_id=None):
             if user_id:
                 cur.execute("UPDATE users SET hash_code = E%s WHERE user_id = %s AND verified = TRUE",
                             (hex_hash_code, user_id))
+                return cur.rowcount
             elif email:
-                cur.execute("UPDATE users SET hash_code = E%s WHERE email = %s AND verified = TRUE",
+                cur.execute("UPDATE users SET hash_code = E%s WHERE email = %s AND verified = TRUE RETURNING user_id",
                             (hex_hash_code, email))
+                return cur.rowcount, cur.fetchone()[0]
             else:
                 raise TypeError('Neither email nor user_id were provided.')
-            return cur.rowcount
 
 
 # Helper function for select_all_users and select_one_user that converts a data record from the cursor into a more
