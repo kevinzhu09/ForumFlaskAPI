@@ -26,7 +26,7 @@ from routes.routes_config import *
 
 from routes.SQL_functions.users_table_SQL import *
 
-from constants import APP_URI, API_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
+from constants import APP_URI, APP_URI_LIST, API_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
 from hash_code_functions import *
 from flask import jsonify, render_template, request
 from flask_jwt_extended import create_access_token
@@ -37,7 +37,7 @@ basedir = path.abspath(path.dirname(__file__))
 
 app = Flask(__name__, template_folder=path.join(basedir, '/templates'))
 
-cors = CORS(app, resources={r"/api/*": {"origins": APP_URI}})
+cors = CORS(app, resources={r"/api/*": {"origins": APP_URI_LIST}})
 
 # with open(path.join(basedir, 'mail_JWT_config.json')) as file:
 #     mail_JWT_data = load(file)

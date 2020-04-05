@@ -84,9 +84,8 @@ def remove_user():
     hash_code = select_hash_code(conn_info, user_id)
     verify = verify_hash_code(password, hash_code)
     if verify:
-        rows_affected = delete_user(conn_info, user_id)
-        if rows_affected == 1:
-            return jsonify(message="You deleted a user.", code=0)
+        delete_user(conn_info, user_id)
+        return jsonify(message="You deleted a user.", code=0)
     else:
         return jsonify(message="Incorrect password.", code=1), 401
 
