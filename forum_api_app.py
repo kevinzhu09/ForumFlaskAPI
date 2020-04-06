@@ -8,7 +8,7 @@
 # db_config.json, which contains the sensitive configuration info to connect to the PostgreSQL database.
 # mail_JWT_config.json, which contains the mail client and JWT configuration info.
 # hash_code_functions.py, which contains the functions for storing the user password in a hash code.
-# constants.py, which contains the constants including fields, which can be modified.
+# APIConfig.json, which contains the constants including fields, which can be modified.
 # These files should all be in the same folder.
 # This app requires Python 3.7 or later.
 
@@ -26,35 +26,31 @@ from routes.routes_config import *
 
 from routes.SQL_functions.users_table_SQL import *
 
-from constants import APP_URI_LIST, APP_URI, MINUTES_BEFORE_TOKEN_EXPIRE, SERVER_NAME, TIME_TO_EXPIRE
 from hash_code_functions import *
 from flask import jsonify, render_template, request
 from flask_jwt_extended import create_access_token
 from flask_mail import Message, Mail
+
+from config.APIConfig import mail_data, JWT_data, APP_URI, TOKEN_TTL_MINUTES, TIME_TO_EXPIRE, SERVER_NAME
 
 # Configuration for the Flask app, JWT integration and mail server:
 basedir = path.abspath(path.dirname(__file__))
 
 app = Flask(__name__, template_folder=path.join(basedir, '/templates'))
 
-cors = CORS(app, resources={r"/api/*": {"origins": APP_URI_LIST}})
+cors = CORS(app, resources={r"/api/*": {"origins": APP_URI}})
 
 # with open(path.join(basedir, 'mail_JWT_config.json')) as file:
 #     mail_JWT_data = load(file)
 
-dirname = path.dirname(__file__)
-mail_JWT_filename = path.join(dirname, 'config', 'mail_JWT_config.json')
 
-with open(mail_JWT_filename) as file:
-    mail_JWT_data = load(file)
-
-app.config['JWT_SECRET_KEY'] = mail_JWT_data['JWT_SECRET_KEY']
-app.config['MAIL_SERVER'] = mail_JWT_data['MAIL_SERVER']
-app.config['MAIL_PORT'] = mail_JWT_data['MAIL_PORT']
-app.config['MAIL_USERNAME'] = mail_JWT_data['MAIL_USERNAME']
-app.config['MAIL_PASSWORD'] = mail_JWT_data['MAIL_PASSWORD']
-app.config['MAIL_USE_TLS'] = mail_JWT_data['MAIL_USE_TLS']
-app.config['MAIL_USE_SSL'] = mail_JWT_data['MAIL_USE_SSL']
+app.config['JWT_SECRET_KEY'] = JWT_data['JWT_SECRET_KEY']
+app.config['MAIL_SERVER'] = mail_data['MAIL_SERVER']
+app.config['MAIL_PORT'] = mail_data['MAIL_PORT']
+app.config['MAIL_USERNAME'] = mail_data['MAIL_USERNAME']
+app.config['MAIL_PASSWORD'] = mail_data['MAIL_PASSWORD']
+app.config['MAIL_USE_TLS'] = mail_data['MAIL_USE_TLS']
+app.config['MAIL_USE_SSL'] = mail_data['MAIL_USE_SSL']
 
 jwt = JWTManager(app)
 mail = Mail(app)
@@ -92,9 +88,9 @@ def register():
         msg = Message(
             body="To verify your account, please click the following link. If you did not create an account with us "
                  "recently, disregard this email. This link expires after %d minutes.\n%s" % (
-                     MINUTES_BEFORE_TOKEN_EXPIRE, verify_url),
+                     TOKEN_TTL_MINUTES, verify_url),
             html=render_template('verification_email.html', url=verify_url,
-                                 minutes=MINUTES_BEFORE_TOKEN_EXPIRE, username=username, server=SERVER_NAME),
+                                 minutes=TOKEN_TTL_MINUTES, username=username, server=SERVER_NAME),
             sender="no-reply@user-api.com",
             recipients=[email],
             subject="Account Verification Link for " + SERVER_NAME)
@@ -113,9 +109,9 @@ def password_reset():
         msg = Message(
             body="To reset your password, please click the following link. If you did not request a password reset, "
                  "disregard this email. This link expires after %d minutes.\n%s" % (
-                     MINUTES_BEFORE_TOKEN_EXPIRE, reset_url),
+                     TOKEN_TTL_MINUTES, reset_url),
             html=render_template('password_reset_email.html', url=reset_url,
-                                 minutes=MINUTES_BEFORE_TOKEN_EXPIRE, username=username, server=SERVER_NAME),
+                                 minutes=TOKEN_TTL_MINUTES, username=username, server=SERVER_NAME),
             sender="no-reply@user-api.com",
             recipients=[email],
             subject="Password Reset Link for " + SERVER_NAME)

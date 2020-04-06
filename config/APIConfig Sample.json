@@ -1,0 +1,25 @@
+{
+  "APP_URI": "https://host",
+  "TOKEN_LIFETIME_MINUTES": 30,
+  "SALT_LENGTH": 32,
+  "DESIRED_FIELDS": ["first_name", "last_name"],
+  "SERVER_NAME": "Kevin's Forum",
+  "JWT": {
+    "JWT_SECRET_KEY" : "SECRET_PASSWORD"
+  },
+  "mail": {
+    "MAIL_SERVER" : "mail.server.com",
+    "MAIL_PORT" : 555,
+    "MAIL_USERNAME" : "username",
+    "MAIL_PASSWORD" : "password",
+    "MAIL_USE_TLS" : true,
+    "MAIL_USE_SSL" : false
+  },
+  "database": {
+    "dbname" : "database",
+    "dbusername" : "name",
+    "dbpassword" : "password",
+    "dbhost" : "host.com",
+    "dbport" : "555"
+  }
+}
