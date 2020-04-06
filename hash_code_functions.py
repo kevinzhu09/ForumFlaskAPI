@@ -3,7 +3,7 @@ import hashlib
 
 from os import urandom
 
-from constants import SALT_LENGTH
+from config.APIConfig import SALT_LENGTH
 
 
 def get_hash_code(password):

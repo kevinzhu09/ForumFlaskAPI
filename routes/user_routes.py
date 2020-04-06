@@ -1,10 +1,10 @@
 from routes.SQL_functions.users_table_SQL import *
 from routes.routes_config import *
 
-from constants import TIME_TO_EXPIRE, DESIRED_FIELDS
 from hash_code_functions import *
-from flask import jsonify, send_from_directory, request, Blueprint
+from flask import jsonify, request, Blueprint
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from config.APIConfig import TIME_TO_EXPIRE, DESIRED_FIELDS
 
 basedir = path.abspath(path.dirname(__file__))
 user_routes = Blueprint('user_routes', __name__, template_folder=path.join(basedir, '../templates'))

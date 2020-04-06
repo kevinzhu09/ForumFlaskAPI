@@ -1,6 +1,6 @@
 from routes.routes_config import get_conn
 
-from constants import DESIRED_FIELDS, FIELDS_LENGTH, COLUMNS_TO_SELECT, COLUMNS_TO_INSERT
+from config.APIConfig import DESIRED_FIELDS, FIELDS_LENGTH, COLUMNS_TO_SELECT, COLUMNS_TO_INSERT
 
 
 # Helper function for insert_user and update_hash_code.

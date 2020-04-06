@@ -1,9 +1,0 @@
-{
-  "JWT_SECRET_KEY" : "your secret key",
-  "MAIL_SERVER" : "server",
-  "MAIL_PORT" : 587,
-  "MAIL_USERNAME" : "username",
-  "MAIL_PASSWORD" : "the password",
-  "MAIL_USE_TLS" : true,
-  "MAIL_USE_SSL" : false
-}

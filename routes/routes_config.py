@@ -1,17 +1,17 @@
 # External modules: psycopg2 connects to the database. json loads .json files.
 import psycopg2
 from flask import request
-from json import load
 from os import path
+
+# from .. import APIConfig
+from config.APIConfig import db_data
 
 # With the information from db_config.json, configure the connection to the PostgreSQL database.
 # Saves the connection information in a tuple.
 
 dirname = path.dirname(__file__)
-db_filename = path.join(dirname, 'db_config.json')
+APIConfig_filename = path.join(dirname, '../config/APIConfig.json')
 
-with open(db_filename) as file:
-    db_data = load(file)
 
 db_name = db_data['dbname']
 db_username = db_data['dbusername']

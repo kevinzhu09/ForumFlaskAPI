@@ -1,6 +1,5 @@
 #ignore files
-*/db_config.json
+*/APIConfig.json
 .idea/
 *__pycache__*
 venv/
-*/mail_JWT_config.json
