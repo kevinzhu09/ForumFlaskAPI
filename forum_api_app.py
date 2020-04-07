@@ -31,7 +31,7 @@ from flask import jsonify, render_template, request
 from flask_jwt_extended import create_access_token
 from flask_mail import Message, Mail
 
-from config.APIConfig import mail_data, JWT_data, APP_URI, TOKEN_TTL_MINUTES, TIME_TO_EXPIRE, SERVER_NAME
+from config.APIConfig import mail_data, JWT_data, APP_URI, TOKEN_TTL_TIMEDELTA, TOKEN_TTL_MINUTES, SERVER_NAME, SERVER_EMAIL
 
 # Configuration for the Flask app, JWT integration and mail server:
 basedir = path.abspath(path.dirname(__file__))
@@ -59,10 +59,28 @@ app.register_blueprint(user_routes)
 app.register_blueprint(post_routes)
 
 
-# If there are more types of errors, each error gets a code of 1,2,4,8,16, etc. The code is saved in a variable and
-# added to for each error. If the code != 0, then a 409 error or some other error is returned. The recipient of this
-# request can check with javascript or some language which errors happened. if the code is code=7=1110, then it can
-# be checked with: code=7 && 1 | code && 2 | code && 4 | code && 8 | etc.
+def send_email(access_token, email, username, email_type):
+    if email_type == 'verification':
+        url_path = "/verify"
+        body_text = "To verify your account, please click the following link. If you did not create an account with " \
+                    "us recently, disregard this email. "
+        template = 'verification_email.html'
+        subject = "Account Verification Link for " + SERVER_NAME
+    elif email_type == 'reset':
+        url_path = "/password/reset/confirm"
+        body_text = "To reset your password, please click the following link. If you did not request a password " \
+                    "reset, disregard this email. "
+        template = 'password_reset_email.html'
+        subject = "Password Reset Link for " + SERVER_NAME
+    else:
+        raise TypeError("Must include the email_type.")
+    url = APP_URI + "%s?token=" % url_path + access_token
+    body = "%s This link expires after %d minutes.\n%s" % (body_text, TOKEN_TTL_MINUTES, url)
+    html = render_template(template, url=url, minutes=TOKEN_TTL_MINUTES, username=username, server=SERVER_NAME)
+    msg = Message(body=body, html=html, sender=SERVER_EMAIL, recipients=[email], subject=subject)
+    mail.send(msg)
+
+
 @app.route('/api/register', methods=['POST'])
 def register():
     email = request_dynamic(request.is_json)('email')
@@ -83,18 +101,8 @@ def register():
 
         access_token = create_access_token(
             identity={"email": email, "username": username, "unverified_user_id": unverified_user_id},
-            expires_delta=TIME_TO_EXPIRE)
-        verify_url = APP_URI + "/verify?token=" + access_token
-        msg = Message(
-            body="To verify your account, please click the following link. If you did not create an account with us "
-                 "recently, disregard this email. This link expires after %d minutes.\n%s" % (
-                     TOKEN_TTL_MINUTES, verify_url),
-            html=render_template('verification_email.html', url=verify_url,
-                                 minutes=TOKEN_TTL_MINUTES, username=username, server=SERVER_NAME),
-            sender="no-reply@user-api.com",
-            recipients=[email],
-            subject="Account Verification Link for " + SERVER_NAME)
-        mail.send(msg)
+            expires_delta=TOKEN_TTL_TIMEDELTA)
+        send_email(access_token, email, username, 'verification')
 
         return jsonify(message="User created successfully. Verification email sent to %s." % email, code=0), 201
 
@@ -104,18 +112,8 @@ def password_reset():
     email = request_dynamic(request.is_json)('email')
     if email_exists(conn_info, email):
         username = email.split("@")[0]
-        access_token = create_access_token(identity={"email": email}, expires_delta=TIME_TO_EXPIRE)
-        reset_url = APP_URI + "/password/reset/confirm?token=" + access_token
-        msg = Message(
-            body="To reset your password, please click the following link. If you did not request a password reset, "
-                 "disregard this email. This link expires after %d minutes.\n%s" % (
-                     TOKEN_TTL_MINUTES, reset_url),
-            html=render_template('password_reset_email.html', url=reset_url,
-                                 minutes=TOKEN_TTL_MINUTES, username=username, server=SERVER_NAME),
-            sender="no-reply@user-api.com",
-            recipients=[email],
-            subject="Password Reset Link for " + SERVER_NAME)
-        mail.send(msg)
+        access_token = create_access_token(identity={"email": email}, expires_delta=TOKEN_TTL_TIMEDELTA)
+        send_email(access_token, email, username, 'reset')
 
         return jsonify(message="Email sent to %s." % email, code=0), 202
     else:

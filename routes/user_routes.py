@@ -4,7 +4,7 @@ from routes.routes_config import *
 from hash_code_functions import *
 from flask import jsonify, request, Blueprint
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
-from config.APIConfig import TIME_TO_EXPIRE, DESIRED_FIELDS
+from config.APIConfig import TOKEN_TTL_TIMEDELTA, DESIRED_FIELDS
 
 basedir = path.abspath(path.dirname(__file__))
 user_routes = Blueprint('user_routes', __name__, template_folder=path.join(basedir, '../templates'))
@@ -36,7 +36,7 @@ def verify_account():
 
             rows_affected = verify_user(conn_info, email, unverified_user_id)
             if rows_affected == 1:
-                access_token = create_access_token(identity={"user_id": unverified_user_id}, expires_delta=TIME_TO_EXPIRE)
+                access_token = create_access_token(identity={"user_id": unverified_user_id}, expires_delta=TOKEN_TTL_TIMEDELTA)
                 return jsonify(message="User verified successfully. Access token returned.", access_token=access_token, code=0)
             else:
                 return jsonify(
@@ -59,7 +59,7 @@ def login():
         verify = verify_hash_code(password, hash_code)
         if verify:
             user_id = hash_code_and_id[1]
-            access_token = create_access_token(identity={"user_id": user_id}, expires_delta=TIME_TO_EXPIRE)
+            access_token = create_access_token(identity={"user_id": user_id}, expires_delta=TOKEN_TTL_TIMEDELTA)
             return jsonify(message="Login succeeded! Access token returned.", access_token=access_token, code=0)
     return jsonify(message="Invalid email or password.", code=1), 401
 
@@ -143,7 +143,7 @@ def change_password():
         rows_affected = update_hash_code(conn_info, new_hash_code, email=email)[0]
         if rows_affected == 1:
             user_id = update_hash_code(conn_info, new_hash_code, email=email)[1]
-            access_token = create_access_token(identity={"user_id": user_id}, expires_delta=TIME_TO_EXPIRE)
+            access_token = create_access_token(identity={"user_id": user_id}, expires_delta=TOKEN_TTL_TIMEDELTA)
             return jsonify(message="Password reset successfully. Access token returned.", access_token=access_token, code=0)
         else:
             return jsonify(message="That user does not exist or is not the requester.", code=3), 404

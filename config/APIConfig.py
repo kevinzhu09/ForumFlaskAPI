@@ -3,7 +3,7 @@ from json import load
 from datetime import timedelta
 
 dirname = path.dirname(__file__)
-APIConfig_filename = path.join(dirname, 'config', 'APIConfig.json')
+APIConfig_filename = path.join(dirname, 'APIConfig.json')
 
 with open(APIConfig_filename) as file:
     APIConfig = load(file)
@@ -12,10 +12,11 @@ with open(APIConfig_filename) as file:
     db_data = APIConfig["database"]
     APP_URI = APIConfig["APP_URI"]
     SALT_LENGTH = APIConfig["SALT_LENGTH"]
-    TIME_TO_EXPIRE = APIConfig["TOKEN_TTL_MINUTES"]
-    TOKEN_TTL_MINUTES = timedelta(minutes=TIME_TO_EXPIRE)
+    TOKEN_TTL_MINUTES = APIConfig["TOKEN_TTL_MINUTES"]
+    TOKEN_TTL_TIMEDELTA = timedelta(minutes=TOKEN_TTL_MINUTES)
     DESIRED_FIELDS = APIConfig["DESIRED_FIELDS"]
     SERVER_NAME = APIConfig["SERVER_NAME"]
+    SERVER_EMAIL = APIConfig["SERVER_EMAIL"]
 
 
 separator = ', '

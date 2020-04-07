@@ -1,9 +1,10 @@
 {
   "APP_URI": "https://host",
-  "TOKEN_LIFETIME_MINUTES": 30,
+  "TOKEN_TTL_MINUTES": 30,
   "SALT_LENGTH": 32,
   "DESIRED_FIELDS": ["first_name", "last_name"],
   "SERVER_NAME": "Kevin's Forum",
+  "SERVER_EMAIL": "no-reply@forum-api.com",
   "JWT": {
     "JWT_SECRET_KEY" : "SECRET_PASSWORD"
   },
