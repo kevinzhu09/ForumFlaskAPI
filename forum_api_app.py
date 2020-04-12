@@ -31,7 +31,8 @@ from flask import jsonify, render_template, request
 from flask_jwt_extended import create_access_token
 from flask_mail import Message, Mail
 
-from config.APIConfig import mail_data, JWT_data, APP_URI, TOKEN_TTL_TIMEDELTA, TOKEN_TTL_MINUTES, SERVER_NAME, SERVER_EMAIL
+from config.APIConfig import mail_data, JWT_data, APP_URI, TOKEN_TTL_TIMEDELTA, TOKEN_TTL_MINUTES, SERVER_NAME, \
+    SERVER_EMAIL
 
 # Configuration for the Flask app, JWT integration and mail server:
 basedir = path.abspath(path.dirname(__file__))
@@ -57,6 +58,20 @@ mail = Mail(app)
 
 app.register_blueprint(user_routes)
 app.register_blueprint(post_routes)
+
+
+# Using the expired_token_loader decorator, we will now call
+# this function whenever an expired but otherwise valid access
+# token attempts to access an endpoint
+@jwt.expired_token_loader
+def expired_token_callback(expired_token):
+    token_type = expired_token['type']
+    return jsonify({
+        'status': 401,
+        'sub_status': 42,
+        'msg': 'The {} token has expired'.format(token_type),
+        'code': 'expired'
+    }), 401
 
 
 def send_email(access_token, email, username, email_type):

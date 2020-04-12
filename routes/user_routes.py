@@ -36,8 +36,10 @@ def verify_account():
 
             rows_affected = verify_user(conn_info, email, unverified_user_id)
             if rows_affected == 1:
-                access_token = create_access_token(identity={"user_id": unverified_user_id}, expires_delta=TOKEN_TTL_TIMEDELTA)
-                return jsonify(message="User verified successfully. Access token returned.", access_token=access_token, code=0)
+                access_token = create_access_token(identity={"user_id": unverified_user_id},
+                                                   expires_delta=TOKEN_TTL_TIMEDELTA)
+                return jsonify(message="User verified successfully. Access token returned.", access_token=access_token,
+                               code=0)
             else:
                 return jsonify(
                     message="That user is verified, does not exist or is not the requester, or some other issue.",
@@ -144,7 +146,8 @@ def change_password():
         if rows_affected == 1:
             user_id = update_hash_code(conn_info, new_hash_code, email=email)[1]
             access_token = create_access_token(identity={"user_id": user_id}, expires_delta=TOKEN_TTL_TIMEDELTA)
-            return jsonify(message="Password reset successfully. Access token returned.", access_token=access_token, code=0)
+            return jsonify(message="Password reset successfully. Access token returned.", access_token=access_token,
+                           code=0)
         else:
             return jsonify(message="That user does not exist or is not the requester.", code=3), 404
     else:
@@ -185,3 +188,14 @@ def unlike_authors(author_id: int):
         return jsonify(message="Author has been unliked.", code=0)
     else:
         return jsonify(message="Author is already unliked.", code=0)
+
+
+@user_routes.route('/api/users/username', methods=["GET"])
+@jwt_required
+def get_username():
+    user_id = get_jwt_identity().get("user_id")
+    verified_username = check_verified(conn_info, user_id)
+    if verified_username:
+        return jsonify(userUsername=verified_username, code=0), 200
+    else:
+        return jsonify(message="Unauthorized request to get username.", code=1), 401
