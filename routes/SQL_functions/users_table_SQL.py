@@ -1,12 +1,6 @@
-from routes.routes_config import get_conn
+from routes.routes_config import get_conn, format_binary
 
 from config.APIConfig import DESIRED_FIELDS, FIELDS_LENGTH, COLUMNS_TO_SELECT, COLUMNS_TO_INSERT
-
-
-# Helper function for insert_user and update_hash_code.
-def format_hash_code(hash_code):
-    hex_hash_code = "\\\\x" + hash_code.hex()
-    return hex_hash_code
 
 
 def insert_user(*values_tuple, conn, hash_code, email, username):
@@ -15,7 +9,7 @@ def insert_user(*values_tuple, conn, hash_code, email, username):
             query = "INSERT INTO users (%s) VALUES (E%%s, %sFALSE) RETURNING user_id" % (
                 COLUMNS_TO_INSERT, '%s, ' * FIELDS_LENGTH)
 
-            parameters_tuple = (format_hash_code(hash_code), email, username) + values_tuple
+            parameters_tuple = (format_binary(hash_code), email, username) + values_tuple
             # Uncomment this line for debugging:
             print('Query: ', query, '\nParameters tuple: ', parameters_tuple)
             cur.execute(query, parameters_tuple)
@@ -56,7 +50,7 @@ def delete_user(conn, user_id):
 def update_hash_code(conn, hash_code, email=None, user_id=None):
     with get_conn(*conn) as conn:
         with conn.cursor() as cur:
-            hex_hash_code = format_hash_code(hash_code)
+            hex_hash_code = format_binary(hash_code)
             if user_id:
                 cur.execute("UPDATE users SET hash_code = E%s WHERE user_id = %s AND verified = TRUE",
                             (hex_hash_code, user_id))

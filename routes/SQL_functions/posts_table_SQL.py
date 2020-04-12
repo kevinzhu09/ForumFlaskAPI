@@ -1,4 +1,4 @@
-from routes.routes_config import get_conn
+from routes.routes_config import get_conn, format_binary
 
 from config.APIConfig import POSTS_INFO_TO_SELECT, POSTS_KEYS, SINGLE_POST_INFO_TO_SELECT, SINGLE_POST_KEYS, \
     AUTHOR_POST_INFO_TO_SELECT, AUTHOR_POST_KEYS
@@ -12,10 +12,31 @@ def insert_post(conn, author_id, title, content):
             return cur.fetchone()[0]
 
 
+def insert_image(conn, image_data, user_id, mime_type):
+    with get_conn(*conn) as conn:
+        with conn.cursor() as cur:
+            query = "INSERT INTO images (image_data, user_id, mime_type) VALUES (E%s, %s, %s) RETURNING image_id"
+
+            parameters_tuple = (format_binary(image_data), user_id, mime_type)
+            # Uncomment this line for debugging:
+            print('Query: ', query, '\nParameters tuple: ', parameters_tuple)
+            cur.execute(query, parameters_tuple)
+            return cur.fetchone()[0]
+
+
+def select_image(conn, image_id):
+    with get_conn(*conn) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT image_data, mime_type FROM images WHERE image_id = %s", (image_id,))
+            row = cur.fetchone()
+            return {'image_data': row[0], 'mime_type': row[1]} if row else None
+
+
 def select_liked_post(conn, post_id, user_id):
     with get_conn(*conn) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT EXISTS (SELECT * FROM liked_posts WHERE post_id = %s AND user_id = %s)", (post_id, user_id))
+            cur.execute("SELECT EXISTS (SELECT * FROM liked_posts WHERE post_id = %s AND user_id = %s)",
+                        (post_id, user_id))
             return cur.fetchone()[0]
 
 
@@ -86,7 +107,7 @@ def select_liked_posts(conn, user_id):
     with get_conn(*conn) as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT %s FROM liked_posts L INNER JOIN posts P ON L.post_id = P.post_id INNER JOIN users U ON P.author_id = U.user_id WHERE P.deleted = FALSE AND L.user_id = %%s" % POSTS_INFO_TO_SELECT, (user_id,))
+                "SELECT %s FROM liked_posts L INNER JOIN posts P ON L.post_id = P.post_id INNER JOIN users U ON P.author_id = U.user_id WHERE P.deleted = FALSE AND L.user_id = %%s" % POSTS_INFO_TO_SELECT,
+                (user_id,))
             posts = cur.fetchall()
             return [get_dict_from_post(post, POSTS_KEYS) for post in posts] if posts else None
-

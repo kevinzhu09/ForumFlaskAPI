@@ -43,6 +43,13 @@ CREATE TABLE IF NOT EXISTS liked_authors (
     PRIMARY KEY (author_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS images (
+	image_id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL REFERENCES users (user_id),
+	image_data bytea NOT NULL,
+	image_name VARCHAR(20) NOT NULL,
+	mime_type CHAR(4) NOT NULL
+);
 
 CREATE OR REPLACE PROCEDURE delete_user(INT)
 LANGUAGE plpgsql    

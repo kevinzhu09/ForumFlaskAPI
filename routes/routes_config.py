@@ -49,3 +49,8 @@ def check_verified(conn, user_id):
         with conn.cursor() as cur:
             cur.execute("SELECT username FROM users WHERE user_id = %s AND verified = TRUE", (user_id,))
             return cur.fetchone()[0]
+
+
+# Helper function for insert_user and update_hash_code.
+def format_binary(binary_data):
+    return "\\\\x" + binary_data.hex()
