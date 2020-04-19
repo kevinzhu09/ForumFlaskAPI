@@ -1,7 +1,0 @@
-{
-  "dbname" : "name",
-  "dbusername" : "username",
-  "dbpassword" : "password",
-  "dbhost" : "host",
-  "dbport" : "5432"
-}

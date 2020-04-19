@@ -1,5 +1,4 @@
-# External modules: hashlib handles hashing the password. os handles random number generation.
-import hashlib
+from hashlib import pbkdf2_hmac
 
 from os import urandom
 
@@ -25,7 +24,7 @@ def verify_hash_code(password, hash_code):
 
 # Helper function to calculate the hashed value from a specified algorithm.
 def calculate_hashed_value(password, salt):
-    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000, dklen=128)
+    key = pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000, dklen=128)
     return key
 
 
