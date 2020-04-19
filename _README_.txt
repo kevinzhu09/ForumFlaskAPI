@@ -1,16 +1,16 @@
-1.Create the table in the database. It should include 
-hash code as type:bytea, email, and some other string 
-variables. These other string variables should match the
-DESIRED_FIELDS tuple in constants.py.
+Created by Kevin Zhu
+forum_api_app is the main file to run.
+SQL_scripts set up the database and tables.
+requirements.txt should be in the same folder as this file. It lists the dependencies to install for this application.
+Additional modules part of this API:
+The "routes" folder contains the Flask app routes for the API.
+The "routes/data_access" folder contains the SQL code for the API to contact the database.
+hash_code_functions.py, which contains the functions for storing the user password in a hash code.
+APIConfig.json, which contains the constants including fields, which can be modified.
 
-See create_table_example.sql to demonstrate this.
-(I tested with PostgreSQL)
+This app requires Python 3.7 or later.
 
-2.Update db_config.json with the database configuration
-info. 
-
-3.Update mail_JWT_config.json with your mail server info.
-4.Update constants.py if desired.
-5.Install the dependencies from requirements.txt.
-
-6. Run and use the API.
+External modules: flask handles the URI routes for the API requests. It also allows JSON to be easily written.
+flask_jwt_extended handles the JSON Web Tokens (JWT) integration which is used for login verification.
+flask_mail handles the mail server.
+json helps for reading .json files.

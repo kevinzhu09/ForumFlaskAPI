@@ -1,17 +1,11 @@
-# External modules: psycopg2 connects to the database. json loads .json files.
-import psycopg2
+from psycopg2 import connect
 from flask import request
 from os import path
 
-# from .. import APIConfig
 from config.APIConfig import db_data
-
-# With the information from db_config.json, configure the connection to the PostgreSQL database.
-# Saves the connection information in a tuple.
 
 dirname = path.dirname(__file__)
 APIConfig_filename = path.join(dirname, '../config/APIConfig.json')
-
 
 db_name = db_data['dbname']
 db_username = db_data['dbusername']
@@ -37,20 +31,18 @@ def request_dynamic(request_is_json, allow_null=False):
 
 
 def get_conn(dbname, dbusername, dbpassword, dbhost, dbport):
-    conn = psycopg2.connect(
+    conn = connect(
         "dbname='%s' user='%s' password='%s' host='%s' port='%s'" % (
             dbname, dbusername, dbpassword, dbhost, dbport))
     conn.autocommit = True
     return conn
 
 
-def check_verified(conn, user_id):
-    with get_conn(*conn) as conn:
+def check_regular_user_verified_username(user_id):
+    with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT username FROM users WHERE user_id = %s AND verified = TRUE", (user_id,))
+            cur.execute("SELECT username FROM check_regular_user_verified_username(%s);", (user_id,))
             return cur.fetchone()[0]
 
-
-# Helper function for insert_user and update_hash_code.
 def format_binary(binary_data):
     return "\\\\x" + binary_data.hex()

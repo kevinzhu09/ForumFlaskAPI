@@ -1,9 +1,12 @@
-from routes.SQL_functions.posts_table_SQL import *
-from routes.SQL_functions.users_table_SQL import select_liked_author
-from flask import jsonify, Blueprint, send_file
+from routes.data_access.posts_data_access import insert_post, delete_post, select_post_including_content, \
+    liked_post_exists, select_recent_posts, insert_liked_post, insert_image, select_image, delete_liked_post, \
+    select_recent_posts_from_author, select_liked_posts, update_post
+from routes.data_access.users_data_access import select_liked_author
+from flask import jsonify, Blueprint, send_file, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_optional
-from routes.routes_config import *
+from routes.routes_config import request_dynamic, check_regular_user_verified_username
 from io import BytesIO
+from os import path
 
 basedir = path.abspath(path.dirname(__file__))
 post_routes = Blueprint('post_routes', __name__, template_folder=path.join(basedir, '../templates'))
@@ -16,7 +19,7 @@ def create_post():
     if author_id:
         title = request_dynamic(request.is_json)('title')
         content = request_dynamic(request.is_json)('content')
-        post_id = insert_post(conn=conn_info, author_id=author_id, title=title, content=content)
+        post_id = insert_post(author_id=author_id, title=title, content=content)
         return jsonify(message="Post created successfully.", post_id=post_id, code=0), 201
     else:
         return jsonify(message="Unauthorized request to create post.", code=1), 401
@@ -27,11 +30,8 @@ def create_post():
 def remove_post(post_id: int):
     author_id = get_jwt_identity().get("user_id")
     if author_id:
-        rows_affected = delete_post(conn_info, post_id, author_id)
-        if rows_affected == 1:
-            return jsonify(message="You deleted a post.", code=0)
-        else:
-            return jsonify(message="That post does not both exist and belong to the requester.", code=1), 404
+        delete_post(post_id, author_id)
+        return jsonify(message="You deleted a post.", code=0)
     else:
         return jsonify(message="Unauthorized request to delete post.", code=2), 401
 
@@ -42,11 +42,8 @@ def modify_post(post_id: int):
     author_id = get_jwt_identity().get("user_id")
     if author_id:
         content = request_dynamic(request.is_json)('content')
-        rows_affected = update_post(conn_info, post_id, author_id, content)
-        if rows_affected == 1:
-            return jsonify(message="You updated a post.", code=0)
-        else:
-            return jsonify(message="That post does not both exist and belong to the requester."), 404
+        update_post(content, post_id, author_id)
+        return jsonify(message="You updated a post.", code=0)
     else:
         return jsonify(message="Unauthorized request to modify post."), 401
 
@@ -54,17 +51,17 @@ def modify_post(post_id: int):
 @post_routes.route('/api/posts/<int:post_id>', methods=["GET"])
 @jwt_optional
 def post_details(post_id: int):
-    post = select_post_including_content(conn_info, post_id)
+    post = select_post_including_content(post_id)
     if post:
         author_id = post['author_id']
         current_user = get_jwt_identity()
         if current_user:
             user_id = current_user.get("user_id")
-            verified_username = check_verified(conn_info, user_id)
+            verified_username = check_regular_user_verified_username(user_id)
             if verified_username:
                 own_post = author_id == user_id
                 return jsonify(post_details=post, own_post=own_post,
-                               liked_status=select_liked_post(conn_info, post_id, user_id),
+                               liked_status=liked_post_exists(post_id, user_id),
                                userUsername=verified_username,
                                code=0), 200
             else:
@@ -79,10 +76,10 @@ def post_details(post_id: int):
 @jwt_optional
 def posts():
     current_user = get_jwt_identity()
-    posts_list = select_recent_posts(conn_info)
+    posts_list = select_recent_posts()
     if current_user:
         user_id = current_user.get("user_id")
-        verified_username = check_verified(conn_info, user_id)
+        verified_username = check_regular_user_verified_username(user_id)
         if verified_username:
             if posts_list:
                 return jsonify(posts=posts_list, userUsername=verified_username, code=0)
@@ -103,19 +100,19 @@ def author_posts(author_id: int):
     current_user = get_jwt_identity()
     if current_user:
         user_id = current_user.get("user_id")
-        verified_username = check_verified(conn_info, user_id)
+        verified_username = check_regular_user_verified_username(user_id)
         if verified_username:
             if user_id == author_id:
                 return jsonify(code=0, ownPage=True)
             if author_id == 0:
-                posts_list_and_username = select_recent_posts_from_author(conn_info, user_id)
+                posts_list_and_username = select_recent_posts_from_author(user_id)
             else:
-                posts_list_and_username = select_recent_posts_from_author(conn_info, author_id)
+                posts_list_and_username = select_recent_posts_from_author(author_id)
             posts_list = posts_list_and_username[0]
             author_username = posts_list_and_username[1]
             if posts_list:
                 return jsonify(posts=posts_list, authorUsername=author_username, code=0, ownPage=False, id=user_id,
-                               liked_status=select_liked_author(conn_info, author_id, user_id), userUsername=verified_username)
+                               liked_status=select_liked_author(author_id, user_id), userUsername=verified_username)
             elif author_username:
                 return jsonify(message="That author's posts do not exist.", authorUsername=author_username, code=1, userUsername=verified_username), 404
             else:
@@ -123,7 +120,7 @@ def author_posts(author_id: int):
         else:
             return jsonify(message="Unauthorized request to view posts.", code=3), 401
     else:
-        posts_list_and_username = select_recent_posts_from_author(conn_info, author_id)
+        posts_list_and_username = select_recent_posts_from_author(author_id)
         posts_list = posts_list_and_username[0]
         author_username = posts_list_and_username[1]
         if posts_list:
@@ -138,9 +135,9 @@ def author_posts(author_id: int):
 @jwt_required
 def liked_posts():
     user_id = get_jwt_identity().get("user_id")
-    verified_username = check_verified(conn_info, user_id)
+    verified_username = check_regular_user_verified_username(user_id)
     if verified_username:
-        posts_list = select_liked_posts(conn_info, user_id)
+        posts_list = select_liked_posts(user_id)
         if posts_list:
             return jsonify(posts=posts_list, userUsername=verified_username, code=0)
         else:
@@ -153,10 +150,10 @@ def liked_posts():
 @jwt_required
 def like_posts(post_id: int):
     user_id = get_jwt_identity().get("user_id")
-    if select_liked_post(conn_info, post_id, user_id):
+    if liked_post_exists(post_id, user_id):
         return jsonify(message="Post is already liked.", code=0)
     else:
-        insert_liked_post(conn_info, post_id, user_id)
+        insert_liked_post(post_id, user_id)
         return jsonify(message="Post has been liked.", code=0)
 
 
@@ -164,25 +161,18 @@ def like_posts(post_id: int):
 @jwt_required
 def unlike_posts(post_id: int):
     user_id = get_jwt_identity().get("user_id")
-    if select_liked_post(conn_info, post_id, user_id):
-        delete_liked_post(conn_info, post_id, user_id)
+    if liked_post_exists(post_id, user_id):
+        delete_liked_post(post_id, user_id)
         return jsonify(message="Post has been unliked.", code=0)
     else:
         return jsonify(message="Post is already unliked.", code=0)
-
-
-# @post_routes.route('/api/posts/likes/<int:post_id>', methods=["GET"])
-# @jwt_required
-# def post_liked_status(post_id: int):
-#     user_id = get_jwt_identity().get("user_id")
-#     return jsonify(liked_status=select_liked_post(conn_info, post_id, user_id), code=0)
 
 
 @post_routes.route('/api/images', methods=["POST"])
 @jwt_required
 def images_post():
     user_id = get_jwt_identity().get("user_id")
-    if check_verified(conn_info, user_id):
+    if check_regular_user_verified_username(user_id):
         file = request.files.get('file', None)
         if file:
             image_data = file.read()
@@ -190,7 +180,7 @@ def images_post():
             if mimetype.startswith('image/', 0, 6):
                 mimetype_ext = mimetype[6:10]
 
-                image_id = insert_image(conn_info, image_data, user_id, mimetype_ext)
+                image_id = insert_image(image_data, user_id, mimetype_ext)
                 return jsonify(code=0, url=request.base_url + "/" + str(image_id))
             else:
                 return jsonify(code=3, message="The uploaded file did not begin with image/.")
@@ -202,6 +192,5 @@ def images_post():
 
 @post_routes.route('/api/images/<int:image_id>', methods=["GET"])
 def images_get(image_id: int):
-    image = select_image(conn_info, image_id)
-    print(bytes(image["image_data"]))
+    image = select_image(image_id)
     return send_file(BytesIO(image["image_data"]), "image/" + image['mime_type'])
