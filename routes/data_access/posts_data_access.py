@@ -1,7 +1,6 @@
 from routes.routes_config import get_conn, format_binary, conn_info
 
 
-
 def insert_post(author_id, title, content):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
@@ -58,9 +57,12 @@ def update_post(content, post_id, author_id):
 def select_post_including_content(post_id):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT title, content, author_id, created_timestamp, username FROM select_post_including_content(%s);", (post_id,))
+            cur.execute(
+                "SELECT title, content, author_id, created_timestamp, username FROM select_post_including_content(%s);",
+                (post_id,))
             post = cur.fetchone()
-            return {k: v for (k, v) in zip(('title', 'content', 'author_id', 'created_timestamp', 'username'), (*post,))} \
+            return {k: v for (k, v) in
+                    zip(('title', 'content', 'author_id', 'created_timestamp', 'username'), (*post,))} \
                 if post[0] and post[1] and post[2] and post[3] and post[4] else None
 
 
@@ -69,14 +71,19 @@ def select_recent_posts():
         with conn.cursor() as cur:
             cur.execute("SELECT post_id, author_id, title, username, created_timestamp FROM select_recent_posts();")
             posts = cur.fetchall()
-            return [{k: v for (k, v) in zip(('post_id', 'author_id', 'title', 'username', 'created_timestamp'), (*post,))} for post in posts] if posts else None
+            return [
+                {k: v for (k, v) in zip(('post_id', 'author_id', 'title', 'username', 'created_timestamp'), (*post,))}
+                for post in posts] if posts else None
+
 
 def select_recent_posts_from_author(author_id):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT post_id, title, created_timestamp, username FROM select_recent_posts_from_author(%s);", (author_id,))
+            cur.execute("SELECT post_id, title, created_timestamp FROM select_recent_posts_from_author(%s);",
+                        (author_id,))
             posts = cur.fetchall()
-            posts = [{k: v for (k, v) in zip(('post_id', 'title', 'created_timestamp'), (*post,))} for post in posts] if posts else None
+            posts = [{k: v for (k, v) in zip(('post_id', 'title', 'created_timestamp'), (*post,))} for post in
+                     posts] if posts else None
             cur.execute("SELECT username FROM select_username(%s);", (author_id,))
             username = cur.fetchone()[0]
             return posts, username
@@ -85,6 +92,9 @@ def select_recent_posts_from_author(author_id):
 def select_liked_posts(user_id):
     with get_conn(*conn_info) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT post_id, author_id, title, username, created_timestamp FROM select_liked_posts(%s);", (user_id,))
+            cur.execute("SELECT post_id, author_id, title, username, created_timestamp FROM select_liked_posts(%s);",
+                        (user_id,))
             posts = cur.fetchall()
-            return [{k: v for (k, v) in zip(('post_id', 'author_id', 'title', 'username', 'created_timestamp'), (*post,))} for post in posts] if posts else None
+            return [
+                {k: v for (k, v) in zip(('post_id', 'author_id', 'title', 'username', 'created_timestamp'), (*post,))}
+                for post in posts] if posts else None
