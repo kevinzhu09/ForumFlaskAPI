@@ -10,7 +10,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL insert_post(27, 'My Titl5', 'THIS IS MY CONTENT', NULL);
 -- insert_image
 CREATE OR REPLACE PROCEDURE insert_image(IN image_data BYTEA, IN user_id INTEGER, IN mime_type CHAR(4), INOUT image_id INTEGER)
 LANGUAGE plpgsql
@@ -21,7 +20,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL insert_image(E'DEADBEEF', 27, 'png', NULL);
 -- select_image
 CREATE OR REPLACE FUNCTION select_image(IN image_id INTEGER, OUT image_data BYTEA, OUT mime_type CHAR(4))
 AS $$
@@ -31,8 +29,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT image_data, mime_type FROM select_image(5);
 -- select_liked_post
 CREATE OR REPLACE FUNCTION liked_post_exists(IN post_id INTEGER, IN user_id INTEGER, OUT exists_bool BOOLEAN)
 AS $$
@@ -42,8 +38,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT exists_bool FROM liked_post_exists(6,27);
 -- insert_liked_post
 CREATE OR REPLACE PROCEDURE insert_liked_post(IN post_id INTEGER, IN user_id INTEGER)
 LANGUAGE plpgsql
@@ -53,7 +47,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL insert_liked_post(10,27);
 -- delete_liked_post
 CREATE OR REPLACE PROCEDURE delete_liked_post(IN post_id INTEGER, IN user_id INTEGER)
 LANGUAGE plpgsql
@@ -63,7 +56,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL delete_liked_post(2,27);
 -- delete_post
 CREATE OR REPLACE PROCEDURE delete_post(IN post_id INTEGER, IN author_id INTEGER)
 LANGUAGE plpgsql
@@ -73,7 +65,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL delete_post(6,27);
 -- update_post
 CREATE OR REPLACE PROCEDURE update_post(IN content TEXT, IN post_id INTEGER, IN author_id INTEGER)
 LANGUAGE plpgsql
@@ -84,7 +75,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL update_post('Mu conent', 7, 27);
 -- select_post_including_content
 CREATE OR REPLACE FUNCTION select_post_including_content(IN post_id INTEGER, OUT title VARCHAR (30), OUT content TEXT,
 														 OUT author_id INTEGER, OUT created_timestamp TIMESTAMP WITH TIME ZONE, OUT username VARCHAR (20))
@@ -109,8 +99,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT title, content, author_id, created_timestamp, username FROM select_post_including_content(3);
 -- select_recent_posts
 CREATE OR REPLACE FUNCTION select_recent_posts()
   RETURNS TABLE(post_id INTEGER, author_id INTEGER, title VARCHAR (30), username VARCHAR (20), 
@@ -133,8 +121,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT post_id, author_id, title, username, created_timestamp FROM select_recent_posts();
 -- select_recent_posts_from_author
 CREATE OR REPLACE FUNCTION select_recent_posts_from_author(IN author_id INTEGER)
   RETURNS TABLE(post_id INTEGER, title VARCHAR (30), 
@@ -148,8 +134,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT post_id, title, created_timestamp, username FROM select_recent_posts_from_author(27);
 -- select_username
 CREATE OR REPLACE FUNCTION select_username(IN user_id INTEGER, OUT username VARCHAR (20))
 AS $$
@@ -169,8 +153,6 @@ BEGIN
 	END; $$
 
 LANGUAGE plpgsql;
-
-SELECT username FROM select_username(1);
 -- select_liked_posts
 CREATE OR REPLACE FUNCTION select_liked_posts(IN user_id INTEGER)
   RETURNS TABLE(post_id INTEGER, author_id INTEGER, title VARCHAR (30), username VARCHAR (20), 
@@ -203,7 +185,3 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT post_id, author_id, title, username, created_timestamp FROM select_liked_posts(27);
-
-
