@@ -1,9 +1,7 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
--- use functions or stored procedures for all python code to make it simple
 -- insert new user
 -- insert regular user
-DROP PROCEDURE insert_regular_user(IN email VARCHAR (50), IN hash_code BYTEA, IN username VARCHAR (20), INOUT user_id INTEGER);
 CREATE OR REPLACE PROCEDURE insert_regular_user(IN email VARCHAR (50), IN hash_code BYTEA, IN username VARCHAR (20), INOUT user_id INTEGER)
 LANGUAGE plpgsql
 AS $$
@@ -15,8 +13,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL insert_regular_user('kevinzoolu@gmal.com', 'DEADBEEF', 'dracia', NULL);
-CALL insert_regular_user('kevinzoolu@gmal.com', 'DEADBEEF', 'dracia');
 -- insert social login user
 CREATE OR REPLACE PROCEDURE login_social_user(social_id VARCHAR (255), IN email VARCHAR (50), 
 											  IN provider social_login_provider, IN username VARCHAR (20), INOUT user_id INTEGER)
@@ -36,7 +32,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-CALL login_social_user('55334', 'k@gmail.com', 'Google', 'drao', NULL);
 -- verify regular user
 CREATE OR REPLACE PROCEDURE verify_regular_user(IN email VARCHAR (50), IN unverified_user_id INTEGER)
 LANGUAGE plpgsql
@@ -48,8 +43,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-
-CALL verify_regular_user('kevinzoolu@gmal.com', 27);
 -- delete user
 CREATE OR REPLACE PROCEDURE delete_user(IN user_id INTEGER)
 LANGUAGE plpgsql
@@ -66,12 +59,6 @@ BEGIN
 	COMMIT;
 END;
 $$;
-
-
-CALL delete_user(27);
--- comments in between to split things up
--- functions for get requests/select
--- update_regular_user_hash_code by email and by id. split them up
 -- update_regular_user_hash_code_by_id
 CREATE OR REPLACE PROCEDURE update_regular_user_hash_code_by_id(IN hash_code BYTEA, IN user_id INTEGER)
 LANGUAGE plpgsql
@@ -83,8 +70,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-
-CALL update_regular_user_hash_code_by_id(E'DEADBEEF', 27);
 -- update_regular_user_hash_code_by_email
 CREATE OR REPLACE PROCEDURE update_regular_user_hash_code_by_email(IN hash_code BYTEA, IN email VARCHAR (50), INOUT user_id INTEGER)
 LANGUAGE plpgsql
@@ -97,11 +82,7 @@ BEGIN
     COMMIT;
 END;
 $$;
-
-CALL update_regular_user_hash_code_by_email(E'DEADBEEF', 'kevinzoolu@gmal.com', NULL);
 -- select liked authors
-DROP FUNCTION select_liked_authors();
-
 CREATE OR REPLACE FUNCTION select_liked_authors(IN user_id INTEGER)
   RETURNS TABLE(author_id INTEGER, username VARCHAR (20)) AS $$
 BEGIN
@@ -123,8 +104,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT author_id, username FROM select_liked_authors(27);
 -- select hash code and id
 CREATE OR REPLACE FUNCTION select_regular_user_hash_code_and_id(IN email VARCHAR (50), OUT hash_code BYTEA,  OUT user_id INTEGER)
 AS $$
@@ -136,9 +115,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-SELECT * FROM regular_login_users
-SELECT hash_code, user_id FROM select_regular_user_hash_code_and_id('kevin.zhu@uconn.edu');
-
 -- select_unverified_regular_user_hash_code
 CREATE OR REPLACE FUNCTION select_unverified_regular_user_hash_code(IN email VARCHAR (50), IN unverified_user_id INTEGER, OUT hash_code BYTEA)
 AS $$
@@ -149,8 +125,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT hash_code FROM select_unverified_regular_user_hash_code('kevinzoolu@gmail.com', 3);
 -- select_regular_user_hash_code
 CREATE OR REPLACE FUNCTION select_regular_user_hash_code(IN user_id INTEGER, OUT hash_code BYTEA)
 AS $$
@@ -161,8 +135,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT hash_code FROM select_regular_user_hash_code(27);
 -- email exists
 CREATE OR REPLACE FUNCTION regular_user_email_exists(IN email VARCHAR (50), OUT exists_bool BOOLEAN)
 AS $$
@@ -173,8 +145,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT exists_bool FROM regular_user_email_exists('kevinzoolu@gmal.com');
 -- username exists
 CREATE OR REPLACE FUNCTION regular_user_username_exists(IN username VARCHAR (20), OUT exists_bool BOOLEAN)
 AS $$
@@ -185,8 +155,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT exists_bool FROM regular_user_username_exists('dracia');
 -- select_liked_author
 CREATE OR REPLACE FUNCTION select_liked_author(IN author_id INTEGER, IN user_id INTEGER, OUT exists_bool BOOLEAN)
 AS $$
@@ -197,8 +165,6 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT exists_bool FROM select_liked_author(5, 27);
 -- insert_liked_author
 CREATE OR REPLACE PROCEDURE insert_liked_author(IN author_id INTEGER, IN user_id INTEGER)
 LANGUAGE plpgsql
@@ -209,8 +175,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-
-CALL insert_liked_author(5,27);
 -- delete_liked_author
 CREATE OR REPLACE PROCEDURE delete_liked_author(IN author_id INTEGER, IN user_id INTEGER)
 LANGUAGE plpgsql
@@ -220,8 +184,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-
-CALL delete_liked_author(5,27);
 -- check_regular_user_verified_username
 CREATE OR REPLACE FUNCTION check_regular_user_verified_username(IN user_id INTEGER, OUT username VARCHAR (20))
 AS $$
@@ -240,8 +202,6 @@ SELECT
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT username FROM check_regular_user_verified_username(8);
 -- check_social_login
 CREATE OR REPLACE FUNCTION check_social_login(IN user_id INTEGER, OUT social_login BOOLEAN)
 AS $$
@@ -250,8 +210,3 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
-
-SELECT social_login FROM check_social_login(1);
-
-
-
