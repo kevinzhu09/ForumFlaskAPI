@@ -127,7 +127,7 @@ def liked_authors():
         if authors_list:
             return jsonify(authors=authors_list, code=0)
         else:
-            return jsonify(message="Authors do not exist.", code=1), 404
+            return jsonify(message="The user has not liked any authors.", code=1)
     else:
         return jsonify(message="Unauthorized request to view authors.", code=2), 401
 
