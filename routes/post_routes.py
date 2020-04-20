@@ -84,14 +84,14 @@ def posts():
             if posts_list:
                 return jsonify(posts=posts_list, userUsername=verified_username, code=0)
             else:
-                return jsonify(message="Posts do not exist.", userUsername=verified_username, code=1), 404
+                return jsonify(message="There are no posts.", userUsername=verified_username, code=1)
         else:
             return jsonify(message="Unauthorized request to view posts.", code=2), 401
     else:
         if posts_list:
             return jsonify(posts=posts_list, logged_in_as='guest', code=0), 200
         else:
-            return jsonify(message="Posts do not exist.", logged_in_as='guest', code=1), 404
+            return jsonify(message="There are no posts.", logged_in_as='guest', code=1)
 
 
 @post_routes.route('/api/authors/<int:author_id>', methods=["GET"])
@@ -114,7 +114,7 @@ def author_posts(author_id: int):
                 return jsonify(posts=posts_list, authorUsername=author_username, code=0, ownPage=False, id=user_id,
                                liked_status=select_liked_author(author_id, user_id), userUsername=verified_username)
             elif author_username:
-                return jsonify(message="That author's posts do not exist.", authorUsername=author_username, code=1, userUsername=verified_username), 404
+                return jsonify(message="That author has no posts.", authorUsername=author_username, code=1, userUsername=verified_username)
             else:
                 return jsonify(message="That author does not exist.", code=2, userUsername=verified_username), 404
         else:
@@ -126,7 +126,7 @@ def author_posts(author_id: int):
         if posts_list:
             return jsonify(posts=posts_list, authorUsername=author_username, logged_in_as='guest', code=0), 200
         elif author_username:
-            return jsonify(message="That author's posts do not exist.", authorUsername=author_username, logged_in_as='guest', code=1), 404
+            return jsonify(message="That author has no posts.", authorUsername=author_username, logged_in_as='guest', code=1)
         else:
             return jsonify(message="That author does not exist.", logged_in_as='guest', code=2), 404
 
@@ -141,7 +141,7 @@ def liked_posts():
         if posts_list:
             return jsonify(posts=posts_list, userUsername=verified_username, code=0)
         else:
-            return jsonify(message="Posts do not exist.", userUsername=verified_username, code=1), 404
+            return jsonify(message="The user has not liked any posts.", userUsername=verified_username, code=1)
     else:
         return jsonify(message="Unauthorized request to view posts.", code=2), 401
 
